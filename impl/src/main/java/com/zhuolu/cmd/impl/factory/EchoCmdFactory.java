@@ -1,0 +1,21 @@
+package com.zhuolu.cmd.impl.factory;
+
+import com.zhuolu.cmd.core.entry.cmd.Cmd;
+import com.zhuolu.cmd.core.factory.CmdFactory;
+import com.zhuolu.cmd.core.CmdRuntime;
+import com.zhuolu.cmd.impl.cmd.EchoCmd;
+
+import java.util.List;
+
+public class EchoCmdFactory implements CmdFactory {
+
+    @Override
+    public String getName() {
+        return "echo";
+    }
+
+    @Override
+    public Cmd getCmd(Cmd previous, List<String> param, CmdRuntime cmdRuntime) {
+        return new EchoCmd(previous, param, cmdRuntime);
+    }
+}
