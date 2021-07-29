@@ -1,5 +1,6 @@
 package com.zhuolu.cmd.core.utils;
 
+import com.alibaba.fastjson.JSON;
 import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.factory.CmdFactory;
@@ -218,7 +219,7 @@ public final class CmdUtil {
         if (result == null) {
             result = el;
         }
-        return result.toString();
+        return result instanceof String ? result.toString() : JSON.toJSONString(result);
     }
 
     private String format(StringBuilder sb) {
