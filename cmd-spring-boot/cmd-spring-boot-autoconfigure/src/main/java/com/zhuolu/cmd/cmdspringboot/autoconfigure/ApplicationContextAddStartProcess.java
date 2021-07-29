@@ -5,10 +5,12 @@ import com.zhuolu.cmd.core.entry.process.CmdStartProcess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
 public class ApplicationContextAddStartProcess implements CmdStartProcess {
-    @Autowired
     private ApplicationContextExportContext exportContext;
+
+    public void setExportContext(ApplicationContextExportContext exportContext) {
+        this.exportContext = exportContext;
+    }
 
     @Override
     public void process(CmdRuntime cmdRuntime) {

@@ -26,4 +26,16 @@ public class CmdAutoConfigure {
         cmdSocketServer.run(port);
         return cmdSocketServer;
     }
+
+    @Bean
+    public ApplicationContextExportContext applicationContextExportContext() {
+        return new ApplicationContextExportContext();
+    }
+
+    @Bean
+    public CmdStartProcess applicationContextAddStartProcess() {
+        ApplicationContextAddStartProcess process = new ApplicationContextAddStartProcess();
+        process.setExportContext(applicationContextExportContext());
+        return process;
+    }
 }

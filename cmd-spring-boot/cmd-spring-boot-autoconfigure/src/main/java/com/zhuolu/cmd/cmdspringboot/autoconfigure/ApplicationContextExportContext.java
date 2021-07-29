@@ -4,9 +4,7 @@ import com.zhuolu.cmd.core.entry.export.ExportContext;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ApplicationContextExportContext implements ExportContext, ApplicationContextAware {
     private ApplicationContext applicationContext;
 
