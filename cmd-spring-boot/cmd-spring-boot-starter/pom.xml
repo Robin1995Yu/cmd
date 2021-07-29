@@ -48,6 +48,11 @@
             <groupId>com.zhuolu</groupId>
             <artifactId>net</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.zhuolu</groupId>
+            <artifactId>ext</artifactId>
+        </dependency>
     </dependencies>
 
 

@@ -10,7 +10,11 @@ public class ApplicationContextExportContext implements ExportContext, Applicati
 
     @Override
     public Object get(String name) {
-        return applicationContext.getBean(name);
+        try {
+            return applicationContext.getBean(name);
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     @Override
