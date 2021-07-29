@@ -1,4 +1,4 @@
-package com.zhuolu.cmd.cmdspringboot.autoconfigure;
+package com.zhuolu.cmd.cmdspringboot.autoconfigure.bean;
 
 import com.zhuolu.cmd.core.entry.export.ExportContext;
 import org.springframework.beans.BeansException;

@@ -1,9 +1,7 @@
-package com.zhuolu.cmd.cmdspringboot.autoconfigure;
+package com.zhuolu.cmd.cmdspringboot.autoconfigure.bean;
 
 import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.process.CmdStartProcess;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 public class ApplicationContextAddStartProcess implements CmdStartProcess {
     private ApplicationContextExportContext exportContext;
