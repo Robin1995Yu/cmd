@@ -38,11 +38,21 @@
             <optional>true</optional>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.zhuolu</groupId>
             <artifactId>core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.zhuolu</groupId>
+            <artifactId>net</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

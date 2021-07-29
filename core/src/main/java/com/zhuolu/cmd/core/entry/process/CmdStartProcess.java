@@ -1,5 +1,7 @@
 package com.zhuolu.cmd.core.entry.process;
 
-public interface CmdStartProcess {
+import com.zhuolu.cmd.core.CmdRuntime;
 
+public interface CmdStartProcess {
+    void process(CmdRuntime cmdRuntime);
 }

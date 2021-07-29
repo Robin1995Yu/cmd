@@ -10,7 +10,7 @@ import com.zhuolu.cmd.core.entry.export.impl.ProxyExportContextImpl;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ExportContextUtil implements AlterableExportContext {
+public final class ExportContextUtil implements AlterableExportContext, ProxyExportContext {
     public ExportContextUtil() {
         ExportContext propertiesExportContext = new PropertiesExportContext(System.getProperties());
         List<ExportContext> exportContexts = new ArrayList<>(3);
@@ -34,5 +34,10 @@ public final class ExportContextUtil implements AlterableExportContext {
     @Override
     public void set(String name, Object value) {
         alterableExportContext.set(name, value);
+    }
+
+    @Override
+    public void addExportContext(ExportContext exportContext) {
+        extExportContext.addExportContext(exportContext);
     }
 }

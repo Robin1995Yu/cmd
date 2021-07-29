@@ -1,5 +1,6 @@
 package com.zhuolu.cmd.core;
 
+import com.zhuolu.cmd.core.entry.process.CmdStartProcess;
 import com.zhuolu.cmd.core.utils.CmdUtil;
 import com.zhuolu.cmd.core.utils.ExportContextUtil;
 import com.zhuolu.cmd.core.utils.IOUtil;
@@ -7,7 +8,8 @@ import com.zhuolu.cmd.core.utils.PathUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public final class CmdRuntime implements AutoCloseable {
     private final ExportContextUtil exportContextUtil = new ExportContextUtil();
@@ -38,7 +40,14 @@ public final class CmdRuntime implements AutoCloseable {
         return pathUtil;
     }
 
-    public void start(String[] args) {
+    public void start() {
+        start(Collections.emptyList());
+    }
+
+    public void start(List<CmdStartProcess> processes) {
+        for (CmdStartProcess process : processes) {
+            process.process(this);
+        }
         while (runFlag) {
             try {
                 String line = ioUtil.reader().trim();
