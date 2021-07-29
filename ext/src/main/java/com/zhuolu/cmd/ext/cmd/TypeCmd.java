@@ -23,7 +23,7 @@ public class TypeCmd extends AbstractCmd {
     private Iterator<String> iterator;
 
     @Override
-    public void invoke() {
+    public void init() {
         Object o = getCmdRuntime().getExportContextUtil().get(param.get(0));
         String name = o == null ? "null" : o.getClass().getName();
         iterator = new OnceIterator(name);
