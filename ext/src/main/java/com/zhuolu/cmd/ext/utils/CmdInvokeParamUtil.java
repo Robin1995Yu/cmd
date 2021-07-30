@@ -34,10 +34,6 @@ public final class CmdInvokeParamUtil {
         return classLoader;
     }
 
-    public static void main(String[] args) {
-        System.out.println(int[].class.isPrimitive());
-    }
-
     public static Object createInstance(Object source, Class<?> type, Type gType) {
         // null
         if (source == null) {
