@@ -77,4 +77,8 @@ public final class CmdRuntime implements AutoCloseable {
     public void close() throws Exception {
         ioUtil.close();
     }
+
+    public ClassLoader getClassLoader() {
+        return getClass().getClassLoader();
+    }
 }
