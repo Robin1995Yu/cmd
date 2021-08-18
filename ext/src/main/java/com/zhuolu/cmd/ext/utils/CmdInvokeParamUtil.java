@@ -2,15 +2,21 @@ package com.zhuolu.cmd.ext.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -24,7 +30,32 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class CmdInvokeParamUtil {
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss";
+    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<>();
+
+    public static Object createInstance(Object source, Class<?> type) {
+        if (source == null) {
+            return null;
+        }
+        /**
+         * JSON的基础类型转换
+         * 包括一下几类
+         * 除包装类型外的常用数字类型（BigInteger,BigDecimal）
+         * 基础类型（byte,short,int,long,float,double,char,boolean）
+         * 基础类型的包装类型（Byte,Short,Integer,Long,Float,Double,Boolean,Character）
+         * 字符串类型（String）
+         * 时间类型（Date,java.sql.Date,Time,Timestamp,LocalDateTime,LocalDate,LocalTime）
+         */
+        if (isPrimitive(type)) {
+            if (source instanceof String) {
+                return toJsonPrimitive((String) source, type);
+            }
+            if (source instanceof Number) {
+
+            }
+        }
+        return null;
+    }
 
     public static ClassLoader getClassLoader() {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -34,37 +65,55 @@ public final class CmdInvokeParamUtil {
         return classLoader;
     }
 
-    public static Object createInstance(Object source, Class<?> type, Type gType) {
+    public static Object createInstance0(Object source, Class<?> type) {
         // null
-        if (source == null) {
-            return null;
+        if (source == null || type == null) {
+            return source;
         }
         // enum
         if (type != null && type.isEnum() && source.getClass() == String.class) {
             return Enum.valueOf((Class<Enum>) type, (String) source);
         }
-        // json primitive
-        if (type.isPrimitive()) {
-            type = toBoxedClass(type);
+        // JSON primitive
+        Class<?> sourceClass = toPrimitiveClass(source.getClass());
+        if ((sourceClass.isPrimitive()
+                || Number.class.isAssignableFrom(sourceClass)
+                || sourceClass == String.class)
+                &&  isPrimitive(type)) {
+
         }
-        if (isPrimitive(type) && isPrimitive(source.getClass())) {
-            return packageToPrimitive(source, type);
-        }
-        // array
         // map
-        // collection
-        // other
-
-        List<Class<?>> interfaces = Arrays.stream(type.getInterfaces()).collect(Collectors.toList());
-        if (interfaces.contains(Map.class)) {
-
+        if (Arrays.stream(type.getInterfaces()).anyMatch(Map.class::equals)) {
+            Map<Object, Object> sourceMap = (Map<Object, Object>) source;
+            if (Map.class.equals(type)) {
+                return new HashMap<>(sourceMap);
+            } else {
+                Map<Object, Object> result = (Map<Object, Object>) newInstance(type);
+                result.putAll(sourceMap);
+                result.remove("class");
+                return result;
+            }
         }
-        return null;
+        // other
+        return newInstance(type, source);
     }
 
-    public static boolean isPrimitive(Class<?> cls) {
-        return cls.isPrimitive() || cls == String.class || cls == Boolean.class || cls == Character.class
-                || Number.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls);
+    /**
+     * 判断是否为json基础类型
+     * json基础类型包括
+     * java的基础类型
+     * 字符串
+     * 所有包装类型
+     * 所有数字类型
+     * 时间类型
+     * @param c
+     * @return
+     */
+    public static boolean isPrimitive(Class<?> c) {
+        return c.isPrimitive() || c == String.class || c == Boolean.class || c == Character.class
+                || Number.class.isAssignableFrom(c) || Date.class.isAssignableFrom(c)
+                || c == LocalDateTime.class || c == LocalDate.class || c == LocalTime.class
+                || Calendar.class.isAssignableFrom(c);
     }
 
     public static Class<?> toBoxedClass(Class<?> c) {
@@ -88,187 +137,229 @@ public final class CmdInvokeParamUtil {
         return c;
     }
 
-    public static Object packageToPrimitive(Object value, Class<?> type) {
-        if (value == null || type == null || type.isAssignableFrom(value.getClass())) {
-            return value;
+    public static Class<?> toPrimitiveClass(Class<?> c) {
+        if (c == Integer.class) {
+            return int.class;
+        } else if (c == Boolean.class) {
+            return boolean.class;
+        } else if (c == Long.class) {
+            return long.class;
+        } else if (c == Float.class) {
+            return float.class;
+        } else if (c == Double.class) {
+            return double.class;
+        } else if (c == Character.class) {
+            return char.class;
+        } else if (c == Byte.class) {
+            return byte.class;
+        } else if (c == Short.class) {
+            return short.class;
         }
+        return c;
+    }
 
-        if (value instanceof String) {
-            String string = (String) value;
-            if (char.class.equals(type) || Character.class.equals(type)) {
-                if (string.length() != 1) {
-                    throw new IllegalArgumentException(String.format("CAN NOT convert String(%s) to char!" +
-                            " when convert String to char, the String MUST only 1 char.", string));
+    private static Object toJsonPrimitive(String source, Class<?> type) {
+        if (type == String.class) {
+            return source;
+        }
+        if (source.isEmpty()) {
+            throw new IllegalArgumentException("empty string can not case to " + type);
+        }
+        if (type == Byte.class) {
+            try {
+                return Byte.valueOf(source);
+            } catch (Throwable t) {
+                if (source.length() > 1) {
+                    throw new IllegalArgumentException("string length bigger then 1:" + source);
                 }
-                return string.charAt(0);
-            }
-            if (type.isEnum()) {
-                return Enum.valueOf((Class<Enum>) type, string);
-            }
-            if (type == BigInteger.class) {
-                return new BigInteger(string);
-            }
-            if (type == BigDecimal.class) {
-                return new BigDecimal(string);
-            }
-            if (type == Short.class || type == short.class) {
-                return new Short(string);
-            }
-            if (type == Integer.class || type == int.class) {
-                return new Integer(string);
-            }
-            if (type == Long.class || type == long.class) {
-                return new Long(string);
-            }
-            if (type == Double.class || type == double.class) {
-                return new Double(string);
-            }
-            if (type == Float.class || type == float.class) {
-                return new Float(string);
-            }
-            if (type == Byte.class || type == byte.class) {
-                return new Byte(string);
-            }
-            if (type == Boolean.class || type == boolean.class) {
-                return Boolean.valueOf(string);
-            }
-            if (type == Date.class || type == java.sql.Date.class || type == java.sql.Timestamp.class
-                    || type == java.sql.Time.class || type == Calendar.class) {
-                try {
-                    Date date = new SimpleDateFormat(DATE_FORMAT).parse(string);
-                    if (type == java.sql.Date.class) {
-                        return new java.sql.Date(date.getTime());
-                    }
-                    if (type == java.sql.Timestamp.class) {
-                        return new java.sql.Timestamp(date.getTime());
-                    }
-                    if (type == java.sql.Time.class) {
-                        return new java.sql.Time(date.getTime());
-                    }
-                    if (type == Calendar.class) {
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(date);
-                        return calendar;
-                    }
-                    return date;
-                } catch (ParseException e) {
-                    throw new IllegalStateException("Failed to parse date " + value + " by format "
-                            + DATE_FORMAT + ", cause: " + e.getMessage(), e);
-                }
-            }
-            if (type == java.time.LocalDateTime.class) {
-                if (string == null || string.isEmpty()) {
-                    return null;
-                }
-                return LocalDateTime.parse(string);
-            }
-            if (type == java.time.LocalDate.class) {
-                if (string == null || string.isEmpty()) {
-                    return null;
-                }
-                return LocalDate.parse(string);
-            }
-            if (type == java.time.LocalTime.class) {
-                if (string == null || string.isEmpty()) {
-                    return null;
-                }
-                return LocalDateTime.parse(string).toLocalTime();
-            }
-            if (type == Class.class) {
-                try {
-                    return getClassLoader().loadClass(string);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e.getMessage(), e);
-                }
-            }
-            if (char[].class.equals(type)) {
-                // Process string to char array for generic invoke
-                // See
-                // - https://github.com/apache/dubbo/issues/2003
-                int len = string.length();
-                char[] chars = new char[len];
-                string.getChars(0, len, chars, 0);
-                return chars;
+                return (byte) source.charAt(0);
             }
         }
-        if (value instanceof Number) {
-            Number number = (Number) value;
-            if (type == byte.class || type == Byte.class) {
-                return number.byteValue();
+        if (type == Short.class) {
+            return Short.valueOf(source);
+        }
+        if (type == Integer.class) {
+            return Integer.valueOf(source);
+        }
+        if (type == Long.class) {
+            return Long.valueOf(source);
+        }
+        if (type == Float.class) {
+            return Float.valueOf(source);
+        }
+        if (type == Double.class) {
+            return Double.valueOf(source);
+        }
+        if (type == Character.class) {
+            if (source.length() > 1) {
+                throw new IllegalArgumentException("string length bigger then 1:" + source);
             }
-            if (type == short.class || type == Short.class) {
-                return number.shortValue();
+            return source.charAt(0);
+        }
+        if (type == Boolean.class) {
+            return Boolean.valueOf(source);
+        }
+        if (type == BigInteger.class) {
+            return new BigInteger(source);
+        }
+        if (type == BigDecimal.class) {
+            return new BigDecimal(source);
+        }
+        if (type == Date.class) {
+            return formatDateString(source);
+        }
+        if (type == java.sql.Date.class) {
+            return new java.sql.Date(formatDateString(source).getTime());
+        }
+        if (type == Time.class) {
+            return new Time(formatDateString(source).getTime());
+        }
+        if (type == Timestamp.class) {
+            return new Timestamp(formatDateString(source).getTime());
+        }
+        if (type == Calendar.class) {
+            Calendar c = Calendar.getInstance();
+            c.setTime(formatDateString(source));
+            return c;
+        }
+        if (type == LocalDateTime.class || type == LocalTime.class || type == LocalDate.class) {
+            LocalDateTime localDateTime = LocalDateTime.parse(source);
+            if (type == LocalTime.class) {
+                return localDateTime.toLocalTime();
             }
-            if (type == int.class || type == Integer.class) {
-                return number.intValue();
+            if (type == LocalDate.class) {
+                return localDateTime.toLocalDate();
             }
-            if (type == long.class || type == Long.class) {
-                return number.longValue();
+            return localDateTime;
+        }
+        return null;
+    }
+
+    private static Object toJsonPrimitive(Number source, Class<?> type) {
+        if (type == String.class) {
+            return source.toString();
+        }
+        if (type == Byte.class) {
+            source.byteValue();
+        }
+        if (type == Short.class) {
+            return source.shortValue();
+        }
+        if (type == Integer.class) {
+            return source.intValue();
+        }
+        if (type == Long.class) {
+            return source.longValue();
+        }
+        if (type == Float.class) {
+            return source.floatValue();
+        }
+        if (type == Double.class) {
+            return source.doubleValue();
+        }
+        if (type == Character.class) {
+            return (char) source.byteValue();
+        }
+        if (type == Boolean.class) {
+            return source.intValue() > 0;
+        }
+        if (type == BigInteger.class) {
+            return new BigInteger(source.toString());
+        }
+        if (type == BigDecimal.class) {
+            return new BigDecimal(source.toString());
+        }
+        return null;
+    }
+
+    public static Object newInstance(Class<?> c, Object arg) {
+        if (CmdInvokeParamUtil.isPrimitive(c)) {
+//            return packageToPrimitive(arg, c);
+        }
+        Object result = newInstance(c);
+        return setAllFields(c, result, (Map<String, Object>) arg);
+    }
+
+    public static Object newInstance(Class<?> c) {
+        Object result;
+        try {
+            result = c.newInstance();
+        } catch (Throwable t) {
+            Constructor<?>[] constructors = c.getConstructors();
+            if (constructors.length <= 0) {
+                throw new IllegalArgumentException("class " + c.getName() + " do not has any public construct");
             }
-            if (type == float.class || type == Float.class) {
-                return number.floatValue();
+            Constructor<?> constructor = constructors[0];
+            constructor.setAccessible(true);
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            Object[] args = new Object[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                args[i] = CmdInvokeParamUtil.getDefaultValue(parameterTypes[i]);
             }
-            if (type == double.class || type == Double.class) {
-                return number.doubleValue();
-            }
-            if (type == BigInteger.class) {
-                return BigInteger.valueOf(number.longValue());
-            }
-            if (type == BigDecimal.class) {
-                return BigDecimal.valueOf(number.doubleValue());
-            }
-            if (type == Date.class) {
-                return new Date(number.longValue());
-            }
-            if (type == boolean.class || type == Boolean.class) {
-                return 0 != number.intValue();
+            try {
+                result = constructor.newInstance(args);
+            } catch (Throwable e) {
+                throw new IllegalArgumentException("class " + c.getName() + " do not has any public construct");
             }
         }
-        if (value instanceof Collection) {
-            Collection collection = (Collection) value;
-            if (type.isArray()) {
-                int length = collection.size();
-                Object array = Array.newInstance(type.getComponentType(), length);
-                int i = 0;
-                for (Object item : collection) {
-                    Array.set(array, i++, item);
-                }
-                return array;
+        return result;
+    }
+
+    public static Object getDefaultValue(Class<?> c) {
+        if ("char".equals(c.getName())) {
+            return Character.MIN_VALUE;
+        }
+        if ("boolean".equals(c.getName())) {
+            return false;
+        }
+        if ("byte".equals(c.getName())) {
+            return (byte) 0;
+        }
+        if ("short".equals(c.getName())) {
+            return (short) 0;
+        }
+        return c.isPrimitive() ? 0 : null;
+    }
+
+    private static Object setAllFields(Class<?> c, Object target, Map<String, Object> source) {
+        Method[] methods = c.getMethods();
+        Arrays.stream(methods)
+                .filter(m -> m.getName().startsWith("set")
+                        && m.getName().length() >= 4
+                        && m.getParameterTypes().length > 0)
+                .forEach(m ->
+                {
+                    String fieldName = m.getName().substring(3);
+                    fieldName = fieldName.substring(0, 1).toLowerCase() + fieldName.substring(1);
+                    Object fieldValue = source.get(fieldName);
+                    if (fieldValue != null) {
+                        m.setAccessible(true);
+                        try {
+                            fieldValue = newInstance(m.getParameterTypes()[0], fieldValue);
+                            m.invoke(target, fieldValue);
+                        } catch (Throwable e) {
+                            new IllegalArgumentException(fieldValue + "can not case to " + m.getParameterTypes()[0]);
+                        }
+                    }
+                });
+        return target;
+    }
+
+    private static Date formatDateString(String source) {
+        try {
+            Long time = Long.valueOf(source);
+            return new Date(time);
+        } catch (Throwable t) {
+            SimpleDateFormat format = DATE_FORMAT.get();
+            if (format == null) {
+                format = new SimpleDateFormat(DATE_FORMAT_STRING);
+                DATE_FORMAT.set(format);
             }
-            if (!type.isInterface()) {
-                try {
-                    Collection result = (Collection) type.newInstance();
-                    result.addAll(collection);
-                    return result;
-                } catch (Throwable ignored) {
-                }
-            }
-            if (type == List.class) {
-                return new ArrayList<Object>(collection);
-            }
-            if (type == Set.class) {
-                return new HashSet<Object>(collection);
+            try {
+                return format.parse(source);
+            } catch (ParseException e) {
+                throw new IllegalArgumentException("source is not case to " + DATE_FORMAT_STRING + ":" + source);
             }
         }
-        if (value.getClass().isArray() && Collection.class.isAssignableFrom(type)) {
-            int length = Array.getLength(value);
-            Collection collection;
-            if (!type.isInterface()) {
-                try {
-                    collection = (Collection) type.newInstance();
-                } catch (Throwable e) {
-                    collection = new ArrayList<Object>(length);
-                }
-            } else if (type == Set.class) {
-                collection = new HashSet<Object>(Math.max((int) (length/.75f) + 1, 16));
-            } else {
-                collection = new ArrayList<Object>(length);
-            }
-            for (int i = 0; i < length; i++) {
-                collection.add(Array.get(value, i));
-            }
-            return collection;
-        }
-        return value;
     }
 }
