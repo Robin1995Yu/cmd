@@ -10,29 +10,8 @@ public class CmdChannelInitializer extends ChannelInitializer<ServerChannel> {
 
     private static CmdChannelInitializer instance;
 
-    private CmdChannelInitializer(int lineSize) {
+    public CmdChannelInitializer(int lineSize) {
         lineBasedFrameDecoder = new LineBasedFrameDecoder(2048);
-    }
-
-    public static void init() {
-        init(2048);
-    }
-
-    public static void init(int lineSize) {
-        if (instance == null) {
-            synchronized (CmdChannelInitializer.class) {
-                if (instance == null) {
-                    instance = new CmdChannelInitializer(lineSize);
-                }
-            }
-        }
-    }
-
-    public static CmdChannelInitializer getInstance() {
-        if (instance == null) {
-            init();
-        }
-        return instance;
     }
 
     @Override
