@@ -1,41 +1,28 @@
 package com.zhuolu.cmd.net.handler;
 
 import com.zhuolu.cmd.core.CmdRuntime;
-import io.netty.channel.Channel;
+import com.zhuolu.cmd.net.io.ReplaceableInputStream;
+import com.zhuolu.cmd.net.io.ReplaceableOutputStream;
+import com.zhuolu.cmd.net.server.CmdRuntimeRegister;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Map;
-import java.util.TreeMap;
 
 @Sharable
-public class CmdChannelHandler extends ChannelInboundHandlerAdapter {
-    private final Map<Channel, CmdRuntimeHandler> map = new TreeMap<>();
-    private final int lineSize;
-
-    public CmdChannelHandler(int lineSize) {
-        this.lineSize =lineSize;
-    }
-
+public class CmdChannelHandler extends SimpleChannelInboundHandler<NioServerSocketChannel> {
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        byte[] readBuf = new byte[lineSize];
-        byte[] writeBuf = new byte[lineSize];
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(readBuf)));
-        OutputStream os = new ByteArrayOutputStream();
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new ByteArrayOutputStream()));
-        CmdRuntime.create(reader, writer);
-
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, NioServerSocketChannel channel) throws Exception {
+        ReplaceableInputStream inputStream = new ReplaceableInputStream();
+        ReplaceableOutputStream outputStream = new ReplaceableOutputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+        CmdRuntime cmdRuntime = CmdRuntime.create(reader, writer);
+        CmdRuntimeRegister.MAP.put(channel, new CmdRuntimeHandler(cmdRuntime, inputStream, outputStream));
     }
-
-
 }

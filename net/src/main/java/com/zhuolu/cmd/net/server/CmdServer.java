@@ -29,8 +29,7 @@ public class CmdServer {
                 .channel(NioServerSocketChannel.class)
                 .handler(handler)
                 .childHandler(initializer)
-                .localAddress(port)
-                ;
+                .localAddress(port);
         ChannelFuture sync = bootstrap.bind().sync();
     }
 
