@@ -40,7 +40,7 @@ public final class CmdUtil {
         cmd.destroy();
     }
 
-    private Cmd initCmd(String line) {
+    public Cmd initCmd(String line) {
         List<String> strings = splitPipe(line);
         Cmd cmd = null;
         for (String s : strings) {

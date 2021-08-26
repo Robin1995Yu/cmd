@@ -1,14 +1,13 @@
 package com.zhuolu.cmd.net.server;
 
-import com.zhuolu.cmd.net.handler.CmdChannelHandler;
 import com.zhuolu.cmd.net.handler.CmdChannelInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.ServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import javafx.util.Builder;
+
+import java.io.IOException;
 
 public class CmdServer {
     private final int parentGroupSize;
@@ -24,16 +23,14 @@ public class CmdServer {
     public void run() throws InterruptedException {
         ServerBootstrap bootstrap = new ServerBootstrap();
         CmdChannelInitializer initializer = new CmdChannelInitializer(lineSize);
-        CmdChannelHandler handler = new CmdChannelHandler();
         setEventLoopGroup(bootstrap)
                 .channel(NioServerSocketChannel.class)
-                .handler(handler)
                 .childHandler(initializer)
                 .localAddress(port);
         ChannelFuture sync = bootstrap.bind().sync();
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         CmdServer.getBuilder().build().run();
     }
 

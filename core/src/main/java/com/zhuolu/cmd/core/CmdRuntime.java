@@ -40,6 +40,14 @@ public final class CmdRuntime implements AutoCloseable {
         return pathUtil;
     }
 
+    public CmdUtil getCmdUtil() {
+        return cmdUtil;
+    }
+
+    public boolean isRunFlag() {
+        return runFlag;
+    }
+
     public void start() {
         start(Collections.emptyList());
     }
