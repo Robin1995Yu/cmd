@@ -24,8 +24,12 @@ public final class CmdRuntime implements AutoCloseable {
 
     }
 
-    public static CmdRuntime create(BufferedReader reader, BufferedWriter writer) {
-        return new CmdRuntime(reader, writer);
+    public static CmdRuntime create(BufferedReader reader, BufferedWriter writer, List<CmdStartProcess> processes) {
+        CmdRuntime runtime = new CmdRuntime(reader, writer);
+        for (CmdStartProcess process : processes) {
+            process.process(runtime);
+        }
+        return runtime;
     }
 
     public ExportContextUtil getExportContextUtil() {

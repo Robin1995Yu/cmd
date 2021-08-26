@@ -1,5 +1,6 @@
 package com.zhuolu.cmd.net.server;
 
+import com.zhuolu.cmd.core.entry.process.CmdStartProcess;
 import com.zhuolu.cmd.net.handler.CmdChannelInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -8,6 +9,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public class CmdServer {
     private final int parentGroupSize;
@@ -20,9 +23,11 @@ public class CmdServer {
     private EventLoopGroup childGroup;
     private EventLoopGroup singleGroup;
 
+    private List<CmdStartProcess> processes;
+
     public void run() throws InterruptedException {
         ServerBootstrap bootstrap = new ServerBootstrap();
-        CmdChannelInitializer initializer = new CmdChannelInitializer(lineSize);
+        CmdChannelInitializer initializer = new CmdChannelInitializer(lineSize, processes);
         setEventLoopGroup(bootstrap)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(initializer)
@@ -38,12 +43,13 @@ public class CmdServer {
         return new CmdServerBuilder();
     }
 
-    private CmdServer(int parentGroupSize, int childGroupSize, int singleGroupSize, int port, int lineSize) {
+    private CmdServer(int parentGroupSize, int childGroupSize, int singleGroupSize, int port, int lineSize, List<CmdStartProcess> processes) {
         this.parentGroupSize = parentGroupSize;
         this.childGroupSize = childGroupSize;
         this.singleGroupSize = singleGroupSize;
         this.port = port;
         this.lineSize = lineSize;
+        this.processes = processes == null ? Collections.emptyList() : processes;
         if (parentGroupSize < 0 && childGroupSize < 0 && singleGroupSize < 0) {
             singleGroup = new NioEventLoopGroup();
         } else if (parentGroupSize < 0 || childGroupSize < 0) {
@@ -67,6 +73,8 @@ public class CmdServer {
         private int singleGroupSize = -1;
         private int port = 5200;
         private int lineSize = 2048;
+
+        private List<CmdStartProcess> processes;
 
         public CmdServerBuilder parentChildGroupSize(int parentGroupSize, int childGroupSize) {
             if (parentGroupSize <= 0 || childGroupSize <= 0) {
@@ -95,8 +103,14 @@ public class CmdServer {
             return this;
         }
 
-        public CmdServer build() {
-            return new CmdServer(parentGroupSize, childGroupSize, singleGroupSize, port, lineSize);
+        public CmdServerBuilder processes(List<CmdStartProcess> processes) {
+            this.processes = processes;
+            return this;
         }
+
+        public CmdServer build() {
+            return new CmdServer(parentGroupSize, childGroupSize, singleGroupSize, port, lineSize, processes);
+        }
+
     }
 }

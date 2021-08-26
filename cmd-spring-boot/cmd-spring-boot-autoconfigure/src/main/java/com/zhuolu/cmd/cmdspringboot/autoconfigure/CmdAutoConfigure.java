@@ -30,6 +30,7 @@ public class CmdAutoConfigure {
             lineSize = cmdProperties.getLineSize();
         }
         CmdServer cmdServer = CmdServer.getBuilder()
+                .processes(processes)
                 .port(port)
                 .lineSize(lineSize).build();
         cmdServer.run();
