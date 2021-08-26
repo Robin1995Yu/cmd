@@ -61,7 +61,7 @@ public class CmdServer {
         return bootstrap.group(parentGroup, childGroup);
     }
 
-    private static class CmdServerBuilder {
+    public static class CmdServerBuilder {
         private int parentGroupSize = -1;
         private int childGroupSize = -1;
         private int singleGroupSize = -1;

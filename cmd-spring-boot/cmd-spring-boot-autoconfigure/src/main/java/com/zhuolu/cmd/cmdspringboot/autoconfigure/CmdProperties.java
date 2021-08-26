@@ -12,4 +12,9 @@ public class CmdProperties {
      * cmd export port
      */
     private Integer port;
+
+    /**
+     * cmd max line size
+     */
+    private Integer lineSize;
 }

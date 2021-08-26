@@ -11,10 +11,8 @@ import io.netty.handler.codec.LineBasedFrameDecoder;
 public class CmdChannelInitializer extends ChannelInitializer<SocketChannel> {
     private final LineBasedFrameDecoder lineBasedFrameDecoder;
 
-    private static CmdChannelInitializer instance;
-
     public CmdChannelInitializer(int lineSize) {
-        lineBasedFrameDecoder = new LineBasedFrameDecoder(2048);
+        lineBasedFrameDecoder = new LineBasedFrameDecoder(lineSize);
     }
 
     @Override
