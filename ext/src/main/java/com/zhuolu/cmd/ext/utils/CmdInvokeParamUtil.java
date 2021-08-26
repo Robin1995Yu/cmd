@@ -196,7 +196,6 @@ public final class CmdInvokeParamUtil {
         if (type == Date.class) {
             return formatDateString(source);
         }
-
         if (type == java.sql.Date.class) {
             return new java.sql.Date(formatDateString(source).getTime());
         }
