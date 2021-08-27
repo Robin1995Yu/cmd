@@ -7,6 +7,7 @@ import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.ext.utils.CmdInvokeUtil;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.List;
 
 public class InvokeCmd extends AbstractCmd {
@@ -44,7 +45,7 @@ public class InvokeCmd extends AbstractCmd {
         String beanName = beanMethodName.substring(0, cmSplit);
         // 方法名
         String methodName = beanMethodName.substring(cmSplit + 1);
-        Object bean = getCmdRuntime().getExportContextUtil().get(beanName);
+        bean = getCmdRuntime().getExportContextUtil().get(beanName);
         if (bean == null) {
             throw new IllegalArgumentException("no such bean:" + beanName);
         }
@@ -64,17 +65,21 @@ public class InvokeCmd extends AbstractCmd {
             // 只命中一个
             method = methodList.get(0);
         } else {
-            // 命中多个
-            methodList = CmdInvokeUtil.getMethod(methodList, paramList);
-            if (methodList.isEmpty()) {
-                throw new IllegalArgumentException("no such method:" + methodName);
-            }
-            if (methodList.size() == 1) {
-                method = methodList.get(0);
-            } else {
-                // TODO select
-            }
+            // TODO select
         }
-
+        // 开始构造参数
+        args = new Object[paramList.size()];
+        try {
+            Class<?>[] paramClasses = method.getParameterTypes();
+            Type[] paramTypes = method.getGenericParameterTypes();
+            for (int j = 0; j < paramList.size(); j++) {
+                Class<?> paramClass = paramClasses[j];
+                Type paramType = paramTypes[j];
+                Object param = paramList.get(j);
+                args[j] = CmdInvokeUtil.getParam(param, paramClass, paramType);
+            }
+        } catch (Throwable t) {
+            throw new IllegalArgumentException("no such method:" + methodName);
+        }
     }
 }

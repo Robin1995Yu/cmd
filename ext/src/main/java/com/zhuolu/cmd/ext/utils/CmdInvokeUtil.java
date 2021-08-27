@@ -1,6 +1,12 @@
 package com.zhuolu.cmd.ext.utils;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,13 +24,9 @@ public final class CmdInvokeUtil {
                 return false;
             }
             Class<?>[] parameterTypes = method.getParameterTypes();
-            return params.size() == parameterTypes.length;
-        }).collect(Collectors.toList());
-    }
-
-    public static List<Method> getMethod(List<Method> methodList, List<Object> params) {
-        return methodList.stream().filter(method -> {
-            Class<?>[] parameterTypes = method.getParameterTypes();
+            if(params.size() != parameterTypes.length) {
+                return false;
+            }
             int length = parameterTypes.length;
             for (int i = 0; i < length; i++) {
                 if (!isJsonTypeToJavaType(params.get(i), parameterTypes[i])) {
@@ -35,6 +37,82 @@ public final class CmdInvokeUtil {
         }).collect(Collectors.toList());
     }
 
+    public static Object getParam(Object param, Class<?> paramClass, Type paramType) throws Exception {
+        if (param == null) {
+            if (paramClass.isPrimitive()) {
+                throw new Exception();
+            }
+            return null;
+        }
+        if (paramClass.isInstance(param)) {
+            return param;
+        }
+        paramClass = toBoxed(paramClass);
+        if (param instanceof String) {
+            String stringParam = (String) param;
+            if (paramClass == Character.class) {
+                return stringParam.charAt(0);
+            }
+            if (paramClass == String.class) {
+                return stringParam;
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date dateParam = sdf.parse(stringParam);
+            if (paramClass == Date.class) {
+                return dateParam;
+            }
+            if (paramClass == java.sql.Date.class) {
+                return new java.sql.Date(dateParam.getTime());
+            }
+            if (paramClass == Time.class) {
+                return new Time(dateParam.getTime());
+            }
+            if (paramClass == Timestamp.class) {
+                return new Timestamp(dateParam.getTime());
+            }
+            throw new Exception();
+        }
+        if (param instanceof Number) {
+            Number numberParam = (Number) param;
+            if (paramClass == Character.class) {
+                return (char) numberParam.byteValue();
+            }
+            if (paramClass == Byte.class) {
+                return numberParam.byteValue();
+            }
+            if (paramClass == Short.class) {
+                return numberParam.shortValue();
+            }
+            if (paramClass == Integer.class) {
+                return numberParam.intValue();
+            }
+            if (paramClass == Long.class) {
+                return numberParam.longValue();
+            }
+            if (paramClass == Float.class) {
+                return numberParam.floatValue();
+            }
+            if (paramClass == Double.class) {
+                return numberParam.doubleValue();
+            }
+            if (paramClass == BigInteger.class) {
+                return new BigInteger(numberParam.toString());
+            }
+            if (paramClass == BigDecimal.class) {
+                return new BigInteger(numberParam.toString());
+            }
+            if (paramClass == Date.class) {
+                return new Date(numberParam.longValue());
+            }
+            if (paramClass == java.sql.Date.class) {
+                return new java.sql.Date(numberParam.longValue());
+            }
+        }
+        if (param instanceof Boolean) {
+        }
+        return param;
+    }
+
     private static boolean isJsonTypeToJavaType(Object param, Class<?> type) {
         if (param == null) {
             return !type.isPrimitive();
@@ -42,7 +120,8 @@ public final class CmdInvokeUtil {
         type = toBoxed(type);
         // json的基础类型
         if (param instanceof String) {
-            return type == String.class || Date.class.isAssignableFrom(type) || type == Character.class;
+            return type == String.class || Date.class.isAssignableFrom(type) ||
+                    (type == Character.class && ((String) param).length() == 1);
         }
         if (param instanceof Number) {
             return Number.class.isAssignableFrom(type) || Date.class.isAssignableFrom(type) || type == Character.class;
@@ -87,11 +166,6 @@ public final class CmdInvokeUtil {
             return !isJsonPrimitive(type);
         }
         return true;
-    }
-
-    public static void main(String[] args) {
-        Map<String, Object> m = new HashMap<>();
-        System.out.println(isJsonTypeToJavaType(m, String.class));
     }
 
     public <T extends CharSequence> void fun(List<T> ar) {}
