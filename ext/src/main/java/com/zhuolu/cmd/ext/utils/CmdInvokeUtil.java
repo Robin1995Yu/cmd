@@ -1,7 +1,7 @@
 package com.zhuolu.cmd.ext.utils;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import javax.lang.model.type.ArrayType;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
@@ -119,11 +119,29 @@ public final class CmdInvokeUtil {
         if (param instanceof Collection) {
             Collection<?> paramCollection = (Collection<?>) param;
             if (paramClass.isArray()) {
+                // 获取元素的类型
                 Class<?> componentClass = paramClass.getComponentType();
                 Type componentType = componentClass;
                 if (isGeneric) {
-
+                    // 获取带泛型信息代元素类型
+                    GenericArrayType arrayType = (GenericArrayType) paramType;
+                    componentType = arrayType.getGenericComponentType();
+                    // 如果是无法确定的类型（如T或？等）
+                    if (componentType instanceof TypeVariable || componentType instanceof WildcardType) {
+                        componentType = componentClass;
+                    }
                 }
+                Object arrayParam = Array.newInstance(componentClass, paramCollection.size());
+                int index = 0;
+                for (Object o : paramCollection) {
+                    Array.set(arrayParam, index++, getParam(o, componentClass, componentType));
+                }
+                return arrayParam;
+            }
+            if (paramClass == List.class) {
+                List<?> listParam = new ArrayList<>();
+                // TODO 之后写关于List的转换
+
             }
         }
         return param;
