@@ -39,10 +39,10 @@ public final class CmdInvokeUtil {
 
     public static Object getParam(Object param, Class<?> paramClass, Type paramType) throws Exception {
         if (param == null) {
-            if (paramClass.isPrimitive()) {
-                throw new Exception();
+            if (!paramClass.isPrimitive()) {
+                return null;
             }
-            return null;
+            throw new Exception();
         }
         if (paramClass.isInstance(param)) {
             return param;
@@ -107,8 +107,24 @@ public final class CmdInvokeUtil {
             if (paramClass == java.sql.Date.class) {
                 return new java.sql.Date(numberParam.longValue());
             }
+            throw new Exception();
         }
         if (param instanceof Boolean) {
+            if (paramClass == Boolean.class) {
+                return param;
+            }
+            throw new Exception();
+        }
+        boolean isGeneric = paramClass != paramType;
+        if (param instanceof Collection) {
+            Collection<?> paramCollection = (Collection<?>) param;
+            if (paramClass.isArray()) {
+                Class<?> componentClass = paramClass.getComponentType();
+                Type componentType = componentClass;
+                if (isGeneric) {
+
+                }
+            }
         }
         return param;
     }
@@ -167,8 +183,6 @@ public final class CmdInvokeUtil {
         }
         return true;
     }
-
-    public <T extends CharSequence> void fun(List<T> ar) {}
 
     /**
      * 是否是json的基础类型
