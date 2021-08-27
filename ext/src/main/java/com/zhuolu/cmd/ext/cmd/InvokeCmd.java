@@ -4,20 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
-import com.zhuolu.cmd.ext.utils.CmdInvokeMethodUtil;
-import com.zhuolu.cmd.ext.utils.CmdInvokeParamUtil;
+import com.zhuolu.cmd.ext.utils.CmdInvokeUtil;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.zhuolu.cmd.ext.utils.CmdInvokeParamUtil;
 
 public class InvokeCmd extends AbstractCmd {
     public InvokeCmd(Cmd previous, List<String> param, CmdRuntime cmdRuntime) {
@@ -45,10 +35,14 @@ public class InvokeCmd extends AbstractCmd {
         if (i < 0 || !invokeString.endsWith(")")) {
             throw new IllegalArgumentException("invoke param must case to class.method(params)");
         }
+        // 参数列表
         String paramString = invokeString.substring(i + 1, invokeString.length() - 1);
+        // bean名字.方法名
         String beanMethodName = invokeString.substring(0, i);
         int cmSplit = invokeString.lastIndexOf('.');
+        // bean名字
         String beanName = beanMethodName.substring(0, cmSplit);
+        // 方法名
         String methodName = beanMethodName.substring(cmSplit + 1);
         Object bean = getCmdRuntime().getExportContextUtil().get(beanName);
         if (bean == null) {
@@ -61,32 +55,26 @@ public class InvokeCmd extends AbstractCmd {
         } catch (Throwable t) {
             throw new IllegalArgumentException(t);
         }
-        List<Method> methodList = CmdInvokeMethodUtil.matchMethod(c, methodName, paramList);
+        // 找同名同参数数量的方法
+        List<Method> methodList = CmdInvokeUtil.getMethod(c, methodName, paramList);
         if (methodList.isEmpty()) {
-            throw new IllegalArgumentException("no such method");
-        } else if (methodList.size() > 1) {
-            String s = methodList.stream().map(m -> {
-                String methodString = m.getName();
-                methodString += Arrays.stream(m.getParameterTypes()).map(Class::getSimpleName).collect(Collectors.joining(",", "(", ")"));
-                return methodString;
-            }).collect(Collectors.joining(","));
-            throw new IllegalArgumentException("can't has more overwrite method, please use 'class' field to case method type:" + s);
+            throw new IllegalArgumentException("no such method:" + methodName);
         }
-        this.bean = bean;
-        method = methodList.get(0);
-        Class<?>[] types = method.getParameterTypes();
-        Object[] args = new Object[paramList.size()];
-        for (int index = 0; index < paramList.size(); index++) {
-            Class<?> type = types[i];
-            Object param = paramList.get(i);
+        if (methodList.size() == 1) {
+            // 只命中一个
+            method = methodList.get(0);
+        } else {
+            // 命中多个
+            methodList = CmdInvokeUtil.getMethod(methodList, paramList);
+            if (methodList.isEmpty()) {
+                throw new IllegalArgumentException("no such method:" + methodName);
+            }
+            if (methodList.size() == 1) {
+                method = methodList.get(0);
+            } else {
+                // TODO select
+            }
         }
+
     }
-
-
-
-
-
-
-
-
 }
