@@ -4,16 +4,11 @@ import javax.lang.model.type.ArrayType;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class CmdInvokeUtil {
@@ -44,16 +39,13 @@ public final class CmdInvokeUtil {
             }
             throw new Exception();
         }
-        if (paramClass.isInstance(param)) {
-            return param;
-        }
         paramClass = toBoxed(paramClass);
         if (param instanceof String) {
             String stringParam = (String) param;
             if (paramClass == Character.class) {
                 return stringParam.charAt(0);
             }
-            if (paramClass == String.class) {
+            if (CharSequence.class.isAssignableFrom(paramClass)) {
                 return stringParam;
             }
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -99,13 +91,19 @@ public final class CmdInvokeUtil {
                 return new BigInteger(numberParam.toString());
             }
             if (paramClass == BigDecimal.class) {
-                return new BigInteger(numberParam.toString());
+                return new BigDecimal(numberParam.toString());
             }
             if (paramClass == Date.class) {
                 return new Date(numberParam.longValue());
             }
             if (paramClass == java.sql.Date.class) {
                 return new java.sql.Date(numberParam.longValue());
+            }
+            if (paramClass == Time.class) {
+                return new Time(numberParam.longValue());
+            }
+            if (paramClass == Timestamp.class) {
+                return new Timestamp(numberParam.longValue());
             }
             throw new Exception();
         }
@@ -118,6 +116,7 @@ public final class CmdInvokeUtil {
         boolean isGeneric = paramClass != paramType;
         if (param instanceof Collection) {
             Collection<?> paramCollection = (Collection<?>) param;
+            Collection result;
             if (paramClass.isArray()) {
                 // 获取元素的类型
                 Class<?> componentClass = paramClass.getComponentType();
@@ -138,10 +137,53 @@ public final class CmdInvokeUtil {
                 }
                 return arrayParam;
             }
+            Class<?> eClass = Object.class;
+            Type eType = eClass;
+            if (isGeneric) {
+                ParameterizedType connectionType = (ParameterizedType) paramType;
+                Type connectionGen = connectionType.getActualTypeArguments()[0];
+                if (connectionGen instanceof Class) {
+                    // 没有泛型
+                    eClass = (Class<?>) connectionGen;
+                    eType = connectionGen;
+                } else if (connectionGen instanceof ParameterizedType) {
+                    // 带有泛型的
+                    eClass = (Class<?>) ((ParameterizedType) connectionGen).getRawType();
+                    eType = connectionGen;
+                } else if (connectionGen instanceof TypeVariable) {
+                    // T
+                    Type[] bounds = ((TypeVariable<?>) connectionGen).getBounds();
+                    if (bounds.length > 0) {
+                        eClass = (Class<?>) bounds[0];
+                        eType = bounds[0];
+                    }
+                } else if (connectionGen instanceof WildcardType) {
+                    // ?
+                    Type[] upperBounds = ((WildcardType) connectionGen).getUpperBounds();
+                    if (upperBounds.length > 0) {
+                        eClass = (Class<?>) upperBounds[0];
+                        eType = upperBounds[0];
+                    }
+                }
+            }
             if (paramClass == List.class) {
-                List<?> listParam = new ArrayList<>();
-                // TODO 之后写关于List的转换
-
+                result = new ArrayList<>(paramCollection.size());
+            } else if (paramClass == Set.class) {
+                result = new HashSet(paramCollection.size());
+            } else {
+                throw new Exception();
+            }
+            for (Object o : paramCollection) {
+                result.add(getParam(o, eClass, eType));
+            }
+        }
+        if (param instanceof Map) {
+            // TODO 返回是否为Map
+            if (Map.class.isAssignableFrom(paramClass)) {
+                // 泛型和非泛型两种 key和value用递归
+            } else {
+                // 如果有class元素 看看符合不
+                // 直接反射来生成 可能需要再写两个方法
             }
         }
         return param;
