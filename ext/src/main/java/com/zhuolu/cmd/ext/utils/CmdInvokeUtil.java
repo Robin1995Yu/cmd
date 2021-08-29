@@ -1,10 +1,8 @@
 package com.zhuolu.cmd.ext.utils;
 
-import javax.lang.model.type.ArrayType;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -138,33 +136,13 @@ public final class CmdInvokeUtil {
                 return arrayParam;
             }
             Class<?> eClass = Object.class;
-            Type eType = eClass;
+            Type eType = Object.class;
             if (isGeneric) {
                 ParameterizedType connectionType = (ParameterizedType) paramType;
                 Type connectionGen = connectionType.getActualTypeArguments()[0];
-                if (connectionGen instanceof Class) {
-                    // 没有泛型
-                    eClass = (Class<?>) connectionGen;
-                    eType = connectionGen;
-                } else if (connectionGen instanceof ParameterizedType) {
-                    // 带有泛型的
-                    eClass = (Class<?>) ((ParameterizedType) connectionGen).getRawType();
-                    eType = connectionGen;
-                } else if (connectionGen instanceof TypeVariable) {
-                    // T
-                    Type[] bounds = ((TypeVariable<?>) connectionGen).getBounds();
-                    if (bounds.length > 0) {
-                        eClass = (Class<?>) bounds[0];
-                        eType = bounds[0];
-                    }
-                } else if (connectionGen instanceof WildcardType) {
-                    // ?
-                    Type[] upperBounds = ((WildcardType) connectionGen).getUpperBounds();
-                    if (upperBounds.length > 0) {
-                        eClass = (Class<?>) upperBounds[0];
-                        eType = upperBounds[0];
-                    }
-                }
+                Type[] types = toClassAndType(connectionGen);
+                eClass = (Class<?>) types[0];
+                eType = types[1];
             }
             if (paramClass == List.class) {
                 result = new ArrayList<>(paramCollection.size());
@@ -178,11 +156,44 @@ public final class CmdInvokeUtil {
             }
         }
         if (param instanceof Map) {
-            // TODO 返回是否为Map
+            Map<?, ?> mapParam = (Map<?, ?>) param;
             if (Map.class.isAssignableFrom(paramClass)) {
                 // 泛型和非泛型两种 key和value用递归
+                Class<?> keyClass = Object.class;
+                Type keyType = Object.class;
+                Class<?> valueClass = Object.class;
+                Type valueType = Object.class;
+                if (isGeneric) {
+                    ParameterizedType parameterizedType = (ParameterizedType) paramType;
+                    Type key = parameterizedType.getActualTypeArguments()[0];
+                    Type value = parameterizedType.getActualTypeArguments()[1];
+                    Type[] keyTypes = toClassAndType(key);
+                    Type[] valueTypes = toClassAndType(value);
+                    keyClass = (Class<?>) keyTypes[0];
+                    keyType = keyTypes[1];
+                    valueClass = (Class<?>) valueTypes[0];
+                    valueType = valueTypes[1];
+                }
+                Map resultMap = new HashMap();
+                for (Map.Entry<?, ?> entry : mapParam.entrySet()) {
+                    resultMap.put(
+                            getParam(entry.getKey(), keyClass, keyType),
+                            getParam(entry.getValue(), valueClass, valueType));
+                }
+                return resultMap;
             } else {
-                // 如果有class元素 看看符合不
+                String c = (String) mapParam.get("class");
+                if (c != null && c.length() > 0) {
+                    try {
+                        Class<?> clz = Class.forName(c);
+                        if (!paramClass.isAssignableFrom(clz)) {
+                            throw new Exception();
+                        }
+                        paramClass = clz;
+                    } catch (Throwable t) {
+                        throw new Exception();
+                    }
+                }
                 // 直接反射来生成 可能需要再写两个方法
             }
         }
@@ -288,5 +299,88 @@ public final class CmdInvokeUtil {
             return Boolean.class;
         }
         return type;
+    }
+
+    private static Type[] toClassAndType(Type genType) {
+        Class<?> resultClass = Object.class;
+        Type resultType = Object.class;
+        if (genType instanceof Class) {
+            // 没有泛型
+            resultClass = (Class<?>) genType;
+            resultType = genType;
+        } else if (genType instanceof ParameterizedType) {
+            // 带有泛型的
+            resultClass = (Class<?>) ((ParameterizedType) genType).getRawType();
+            resultType = genType;
+        } else if (genType instanceof TypeVariable) {
+            // T
+            Type[] bounds = ((TypeVariable<?>) genType).getBounds();
+            if (bounds.length > 0) {
+                resultClass = (Class<?>) bounds[0];
+                resultType = bounds[0];
+            }
+        } else if (genType instanceof WildcardType) {
+            // ?
+            Type[] upperBounds = ((WildcardType) genType).getUpperBounds();
+            if (upperBounds.length > 0) {
+                resultClass = (Class<?>) upperBounds[0];
+                resultType = upperBounds[0];
+            }
+        }
+        Type[] result = new Type[2];
+        result[0] = resultClass;
+        result[1] = resultType;
+        return result;
+    }
+
+    private static Object newInstance(Class<?> clazz) throws Exception {
+        int modifiers = clazz.getModifiers();
+        if (Modifier.isInterface(modifiers) || Modifier.isAbstract(modifiers)) {
+            // TODO 使用代理 再说吧
+            return null;
+        } else {
+            try {
+                return clazz.newInstance();
+            } catch (Throwable t) {
+                for (Constructor<?> constructor : clazz.getConstructors()) {
+                    try {
+                        Class<?>[] parameterTypes = constructor.getParameterTypes();
+                        int length = parameterTypes.length;
+                        Object[] params = new Object[length];
+                        for (int i = 0; i < length; i++) {
+                            params[i] = getDefaultValue(parameterTypes[i]);
+                        }
+                        return constructor.newInstance(params);
+                    } catch (Throwable ignore) {
+                    }
+                }
+                throw new Exception();
+            }
+        }
+    }
+
+    private static Object getDefaultValue(Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            if (boolean.class == clazz) {
+                return true;
+            }
+            if (char.class == clazz) {
+                return Character.MIN_VALUE;
+            }
+            Long zero = 0L;
+            if (byte.class == clazz) {
+                return zero.byteValue();
+            }
+            if (short.class == clazz) {
+                zero.shortValue();
+            }
+            if (int.class == clazz) {
+                zero.intValue();
+            }
+            if (long.class == clazz) {
+                zero.longValue();
+            }
+        }
+        return null;
     }
 }
