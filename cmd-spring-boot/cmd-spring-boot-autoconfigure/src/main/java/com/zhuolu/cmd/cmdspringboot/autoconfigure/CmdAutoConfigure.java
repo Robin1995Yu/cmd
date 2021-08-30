@@ -2,10 +2,8 @@ package com.zhuolu.cmd.cmdspringboot.autoconfigure;
 
 import com.zhuolu.cmd.cmdspringboot.autoconfigure.bean.ApplicationContextAddStartProcess;
 import com.zhuolu.cmd.cmdspringboot.autoconfigure.bean.ApplicationContextExportContext;
-import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.entry.process.CmdStartProcess;
 import com.zhuolu.cmd.net.server.CmdServer;
-import io.netty.bootstrap.ServerBootstrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

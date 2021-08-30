@@ -5,8 +5,6 @@ import com.zhuolu.demo.domain.TestBean2;
 import com.zhuolu.demo.service.TestService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service("testService")
 public class TestServiceImpl implements TestService {
     @Override
