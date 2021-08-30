@@ -197,28 +197,7 @@ public final class CmdInvokeUtil {
                         throw new Exception();
                     }
                 }
-                Object result = newInstance(paramClass);
-                Method[] methods = paramClass.getMethods();
-                for (Method method : methods) {
-                    String fieldName = method.getName();
-                    Class<?>[] parameterTypes = method.getParameterTypes();
-                    if (fieldName.length() >= 4 && fieldName.startsWith("set") && parameterTypes.length >= 1) {
-                        // 将setter转换为fieldName
-                        fieldName = fieldName.substring(3);
-                        fieldName = fieldName.substring(0, 1).toLowerCase() + fieldName.substring(1);
-                        Class<?> fieldClass = parameterTypes[0];
-                        Type fieldType = method.getGenericParameterTypes()[0];
-                        Object field = mapParam.get(fieldName);
-                        if (field != null) {
-                            try {
-                                Object[] setArgs = new Object[parameterTypes.length];
-                                setArgs[0] = getParam(field, fieldClass, fieldType);
-                                method.invoke(result, setArgs);
-                            } catch (Throwable ignore) {}
-                        }
-                    }
-                }
-                return result;
+                return newInstance(paramClass, mapParam);
             }
         }
         return param;
@@ -357,18 +336,49 @@ public final class CmdInvokeUtil {
         return result;
     }
 
-    private static Object newInstance(Class<?> clazz) throws Exception {
+    private static Object newInstance(Class<?> clazz, Map source) throws Exception {
+        if (source == null) {
+            if (clazz.isPrimitive()) {
+                throw new Exception();
+            }
+            return null;
+        }
         int modifiers = clazz.getModifiers();
         if (Modifier.isInterface(modifiers) || Modifier.isAbstract(modifiers)) {
             if (Modifier.isInterface(modifiers)) {
-
+                return Proxy.newProxyInstance(
+                        Thread.currentThread().getContextClassLoader(),
+                        new Class[]{ clazz },
+                        (proxy, method, args) -> {
+                            if (method.getDeclaringClass() == Object.class) {
+                                if ("equals".equals(method.getName())) {
+                                    return Objects.equals(proxy.toString(), source.toString());
+                                }
+                                return method.invoke(source, args);
+                            }
+                            String methodName = method.getName();
+                            Object value;
+                            if (methodName.length() > 3 && methodName.startsWith("get")) {
+                                value = source.get(methodName.substring(3, 4).toLowerCase() + methodName.substring(4));
+                            } else if (methodName.length() > 2 && methodName.startsWith("is")) {
+                                value = source.get(methodName.substring(2, 3).toLowerCase() + methodName.substring(3));
+                            } else {
+                                value = source.get(methodName.substring(0, 1).toLowerCase() + methodName.substring(1));
+                            }
+                            if (value instanceof Map<?, ?> && !Map.class.isAssignableFrom(method.getReturnType())) {
+                                value = getParam(value, method.getReturnType(), method.getGenericReturnType());
+                            }
+                            return value;
+                        });
             } else if (Modifier.isAbstract(modifiers)) {
-
+                // 在dubbo里面没有看到关于抽象类相关的代理 这个有点尬
+                throw new Exception();
             }
             return null;
         } else {
+            Object result = null;
             try {
-                return clazz.newInstance();
+                result = clazz.newInstance();
             } catch (Throwable t) {
                 for (Constructor<?> constructor : clazz.getConstructors()) {
                     try {
@@ -378,12 +388,34 @@ public final class CmdInvokeUtil {
                         for (int i = 0; i < length; i++) {
                             params[i] = getDefaultValue(parameterTypes[i]);
                         }
-                        return constructor.newInstance(params);
-                    } catch (Throwable ignore) {
-                    }
+                        result = constructor.newInstance(params);
+                        break;
+                    } catch (Throwable ignore) {}
                 }
+            }
+            if (result == null) {
                 throw new Exception();
             }
+            Method[] methods = clazz.getMethods();
+            for (Method method : methods) {
+                String fieldName = method.getName();
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                if (fieldName.length() >= 4 && fieldName.startsWith("set") && parameterTypes.length >= 1) {
+                    fieldName = fieldName.substring(3);
+                    fieldName = fieldName.substring(0, 1).toLowerCase() + fieldName.substring(1);
+                    Class<?> fieldClass = parameterTypes[0];
+                    Type fieldType = method.getGenericParameterTypes()[0];
+                    Object field = source.get(fieldName);
+                    if (field != null) {
+                        try {
+                            Object[] setArgs = new Object[parameterTypes.length];
+                            setArgs[0] = getParam(field, fieldClass, fieldType);
+                            method.invoke(result, setArgs);
+                        } catch (Throwable ignore) {}
+                    }
+                }
+            }
+            return result;
         }
     }
 

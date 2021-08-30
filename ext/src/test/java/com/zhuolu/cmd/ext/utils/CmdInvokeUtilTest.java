@@ -66,11 +66,13 @@ public class CmdInvokeUtilTest<T extends CharSequence> {
         Map<String, Object> source = new HashMap<>();
         source.put("id", 1);
         source.put("name", "zhuolu");
-        source.put("class", "java.lang.Object");
         TestBean testBean = new TestBean();
         testBean.setId(1);
         testBean.setName("zhuolu");
         Assert.assertEquals(CmdInvokeUtil.getParam(source, TestBean.class, TestBean.class), testBean);
+        Runnable param = (Runnable) CmdInvokeUtil.getParam(new HashMap(), Runnable.class, Runnable.class);
+        Assert.assertEquals(param.toString(), "{}");
+        System.out.println(param.equals(param));
     }
 
     private static <T> List<T> listOf(T ... elements) {
