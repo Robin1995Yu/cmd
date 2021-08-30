@@ -31,6 +31,9 @@ public final class CmdInvokeUtil {
     }
 
     public static Object getParam(Object param, Class<?> paramClass, Type paramType) throws Exception {
+        if (Object.class == paramClass) {
+            return param;
+        }
         if (param == null) {
             if (!paramClass.isPrimitive()) {
                 return null;
