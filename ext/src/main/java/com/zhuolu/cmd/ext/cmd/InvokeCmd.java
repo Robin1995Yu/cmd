@@ -4,11 +4,18 @@ import com.alibaba.fastjson.JSON;
 import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
+import com.zhuolu.cmd.core.entry.cmd.iterator.BufferedReaderIterator;
 import com.zhuolu.cmd.ext.utils.CmdInvokeUtil;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public class InvokeCmd extends AbstractCmd {
     public InvokeCmd(Cmd previous, List<String> param, CmdRuntime cmdRuntime) {
@@ -27,6 +34,7 @@ public class InvokeCmd extends AbstractCmd {
     private Object bean;
     private Method method;
     private Object[] args;
+    private String result;
 
     @Override
     protected void init() {
@@ -81,5 +89,21 @@ public class InvokeCmd extends AbstractCmd {
         } catch (Throwable t) {
             throw new IllegalArgumentException("no such method:" + methodName);
         }
+    }
+
+    @Override
+    public void invoke() {
+        try {
+            Object invoke = method.invoke(bean, args);
+            result = Objects.toString(invoke);
+        } catch (Throwable e) {
+            new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
+    protected Iterator<String> doIterator() {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8))));
+        return new BufferedReaderIterator(reader);
     }
 }
