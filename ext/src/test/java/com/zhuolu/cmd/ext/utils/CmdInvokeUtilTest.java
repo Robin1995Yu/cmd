@@ -72,7 +72,7 @@ public class CmdInvokeUtilTest<T extends CharSequence> {
         Assert.assertEquals(CmdInvokeUtil.getParam(source, TestBean.class, TestBean.class), testBean);
         Runnable param = (Runnable) CmdInvokeUtil.getParam(new HashMap(), Runnable.class, Runnable.class);
         Assert.assertEquals(param.toString(), "{}");
-        System.out.println(param.equals(param));
+        Assert.assertEquals(param, param);
     }
 
     private static <T> List<T> listOf(T ... elements) {

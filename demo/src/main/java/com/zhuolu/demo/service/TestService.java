@@ -1,9 +1,11 @@
 package com.zhuolu.demo.service;
 
-import java.util.List;
+import com.zhuolu.demo.domain.TestBean1;
+import com.zhuolu.demo.domain.TestBean2;
 
 public interface TestService {
-    String sayHello(String name);
+    String selectTest(TestBean1 testBean1);
+    String selectTest(TestBean2 testBean2);
 
-    String sayHello(List<String> names);
+
 }

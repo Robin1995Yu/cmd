@@ -1,2 +1,3 @@
 com.zhuolu.cmd.ext.factory.TypeCmdFactory
+com.zhuolu.cmd.ext.factory.SelectCmdFactory
 com.zhuolu.cmd.ext.factory.InvokeCmdFactory

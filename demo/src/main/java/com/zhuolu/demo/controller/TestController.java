@@ -15,6 +15,6 @@ public class TestController {
 
     @GetMapping("/sayHello")
     public String sayHello(@RequestParam String name) {
-        return testService.sayHello(name);
+        return name + "你是狗吧";
     }
 }

@@ -133,11 +133,15 @@ public final class CmdUtil {
     }
 
     public Cmd getCmd(String name, Cmd previous, List<String> param) {
-        CmdFactory cmdFactory = cmdFactoryMap.get(name);
+        CmdFactory cmdFactory = getCmdFactory(name);
         if (cmdFactory == null) {
             throw new IllegalArgumentException("no such cmd:" + name);
         }
         return cmdFactory.getCmd(previous, param, cmdRuntime);
+    }
+
+    public CmdFactory getCmdFactory(String name) {
+        return cmdFactoryMap.get(name);
     }
 
     private int nextSplitChar(int start, String s) {

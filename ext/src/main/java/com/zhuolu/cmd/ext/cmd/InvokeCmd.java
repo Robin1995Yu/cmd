@@ -5,6 +5,8 @@ import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.entry.cmd.iterator.BufferedReaderIterator;
+import com.zhuolu.cmd.ext.domain.InvokeHolder;
+import com.zhuolu.cmd.ext.factory.SelectCmdFactory;
 import com.zhuolu.cmd.ext.utils.CmdInvokeUtil;
 
 import java.io.BufferedReader;
@@ -13,11 +15,15 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
 public class InvokeCmd extends AbstractCmd {
+    private List<InvokeHolder> invokeHolderList;
+    private String result;
+
     public InvokeCmd(Cmd previous, List<String> param, CmdRuntime cmdRuntime) {
         super("invoke", previous, param, cmdRuntime);
     }
@@ -28,13 +34,6 @@ public class InvokeCmd extends AbstractCmd {
             throw new IllegalArgumentException("invoke cmd must has one param");
         }
     }
-
-    private boolean flag = true;
-
-    private Object bean;
-    private Method method;
-    private Object[] args;
-    private String result;
 
     @Override
     protected void init() {
@@ -53,7 +52,7 @@ public class InvokeCmd extends AbstractCmd {
         String beanName = beanMethodName.substring(0, cmSplit);
         // 方法名
         String methodName = beanMethodName.substring(cmSplit + 1);
-        bean = getCmdRuntime().getExportContextUtil().get(beanName);
+        Object bean = getCmdRuntime().getExportContextUtil().get(beanName);
         if (bean == null) {
             throw new IllegalArgumentException("no such bean:" + beanName);
         }
@@ -69,33 +68,46 @@ public class InvokeCmd extends AbstractCmd {
         if (methodList.isEmpty()) {
             throw new IllegalArgumentException("no such method:" + methodName);
         }
-        if (methodList.size() == 1) {
-            // 只命中一个
-            method = methodList.get(0);
-        } else {
-            // TODO select
-        }
+        invokeHolderList = new ArrayList<>(methodList.size());
         // 开始构造参数
-        args = new Object[paramList.size()];
-        try {
-            Class<?>[] paramClasses = method.getParameterTypes();
-            Type[] paramTypes = method.getGenericParameterTypes();
-            for (int j = 0; j < paramList.size(); j++) {
-                Class<?> paramClass = paramClasses[j];
-                Type paramType = paramTypes[j];
-                Object param = paramList.get(j);
-                args[j] = CmdInvokeUtil.getParam(param, paramClass, paramType);
+        for (Method method : methodList) {
+            Object[] args = new Object[paramList.size()];
+            try {
+                Class<?>[] paramClasses = method.getParameterTypes();
+                Type[] paramTypes = method.getGenericParameterTypes();
+                for (int j = 0; j < paramList.size(); j++) {
+                    Class<?> paramClass = paramClasses[j];
+                    Type paramType = paramTypes[j];
+                    Object param = paramList.get(j);
+                    args[j] = CmdInvokeUtil.getParam(param, paramClass, paramType);
+                }
+            } catch (Throwable t) {
+                throw new IllegalArgumentException("no such method:" + methodName);
             }
-        } catch (Throwable t) {
-            throw new IllegalArgumentException("no such method:" + methodName);
+            invokeHolderList.add(new InvokeHolder(bean, method, args));
         }
     }
 
     @Override
     public void invoke() {
         try {
-            Object invoke = method.invoke(bean, args);
-            result = Objects.toString(invoke);
+            if (invokeHolderList.size() == 1) {
+                InvokeHolder invokeHolder = invokeHolderList.get(0);
+                Object bean = invokeHolder.getBean();
+                Method method = invokeHolder.getMethod();
+                Object[] args = invokeHolder.getArgs();
+                result = Objects.toString(method.invoke(bean, args));
+            } else {
+                StringBuilder sb = new StringBuilder();
+                int index = 0;
+                for (InvokeHolder invokeHolder : invokeHolderList) {
+                    sb.append("select ").append(index++).append("\t").append(invokeHolder).append("\n");
+                }
+                sb.append("please use select n to invoke method").append("\n");
+                result = sb.toString();
+                SelectCmdFactory selectCmdFactory = (SelectCmdFactory) getCmdRuntime().getCmdUtil().getCmdFactory("select");
+                selectCmdFactory.resetInvokeHandlerList(invokeHolderList);
+            }
         } catch (Throwable e) {
             new IllegalArgumentException(e);
         }
