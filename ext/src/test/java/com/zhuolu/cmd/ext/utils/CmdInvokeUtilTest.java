@@ -63,6 +63,14 @@ public class CmdInvokeUtilTest<T extends CharSequence> {
 
         Type integerListListType = CmdInvokeUtilTest.class.getField("integerListList").getGenericType();
         Assert.assertEquals(CmdInvokeUtil.getParam(integerListList, List.class, integerListListType), integerListList);
+        Map<String, Object> source = new HashMap<>();
+        source.put("id", 1);
+        source.put("name", "zhuolu");
+        source.put("class", "java.lang.Object");
+        TestBean testBean = new TestBean();
+        testBean.setId(1);
+        testBean.setName("zhuolu");
+        Assert.assertEquals(CmdInvokeUtil.getParam(source, TestBean.class, TestBean.class), testBean);
     }
 
     private static <T> List<T> listOf(T ... elements) {
@@ -74,4 +82,39 @@ public class CmdInvokeUtilTest<T extends CharSequence> {
     }
 
     public void fun(List<? extends CharSequence> l) {}
+
+    public static class TestBean {
+        private int id;
+
+        private String name;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TestBean testBean = (TestBean) o;
+            return id == testBean.id && Objects.equals(name, testBean.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name);
+        }
+    }
 }

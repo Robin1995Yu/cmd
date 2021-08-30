@@ -197,7 +197,28 @@ public final class CmdInvokeUtil {
                         throw new Exception();
                     }
                 }
-                // 直接反射来生成 可能需要再写两个方法
+                Object result = newInstance(paramClass);
+                Method[] methods = paramClass.getMethods();
+                for (Method method : methods) {
+                    String fieldName = method.getName();
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    if (fieldName.length() >= 4 && fieldName.startsWith("set") && parameterTypes.length >= 1) {
+                        // 将setter转换为fieldName
+                        fieldName = fieldName.substring(3);
+                        fieldName = fieldName.substring(0, 1).toLowerCase() + fieldName.substring(1);
+                        Class<?> fieldClass = parameterTypes[0];
+                        Type fieldType = method.getGenericParameterTypes()[0];
+                        Object field = mapParam.get(fieldName);
+                        if (field != null) {
+                            try {
+                                Object[] setArgs = new Object[parameterTypes.length];
+                                setArgs[0] = getParam(field, fieldClass, fieldType);
+                                method.invoke(result, setArgs);
+                            } catch (Throwable ignore) {}
+                        }
+                    }
+                }
+                return result;
             }
         }
         return param;
@@ -339,7 +360,11 @@ public final class CmdInvokeUtil {
     private static Object newInstance(Class<?> clazz) throws Exception {
         int modifiers = clazz.getModifiers();
         if (Modifier.isInterface(modifiers) || Modifier.isAbstract(modifiers)) {
-            // TODO 使用代理 再说吧
+            if (Modifier.isInterface(modifiers)) {
+
+            } else if (Modifier.isAbstract(modifiers)) {
+
+            }
             return null;
         } else {
             try {
