@@ -17,6 +17,8 @@
         <module>impl</module>
         <module>net</module>
         <module>ext</module>
+        <module>test</module>
+        <module>all</module>
     </modules>
     <packaging>pom</packaging>
     <dependencyManagement>
@@ -39,17 +41,17 @@
             </dependency>
             <dependency>
                 <groupId>com.zhuolu</groupId>
-                <artifactId>core</artifactId>
+                <artifactId>cmd-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.zhuolu</groupId>
-                <artifactId>impl</artifactId>
+                <artifactId>cmd-impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.zhuolu</groupId>
-                <artifactId>net</artifactId>
+                <artifactId>cmd-net</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

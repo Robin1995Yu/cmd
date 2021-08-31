@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>net</artifactId>
+    <artifactId>cmd-net</artifactId>
 
     <dependencies>
         <dependency>
@@ -25,12 +25,12 @@
 
         <dependency>
             <groupId>com.zhuolu</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>cmd-core</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.zhuolu</groupId>
-            <artifactId>impl</artifactId>
+            <artifactId>cmd-impl</artifactId>
         </dependency>
     </dependencies>
 
@@ -47,6 +47,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

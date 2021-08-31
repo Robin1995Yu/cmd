@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ext</artifactId>
+    <artifactId>cmd-ext</artifactId>
     <build>
         <plugins>
             <plugin>
@@ -27,7 +27,7 @@
     <dependencies>
         <dependency>
             <groupId>com.zhuolu</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>cmd-core</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

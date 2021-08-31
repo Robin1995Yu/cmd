@@ -3,19 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>starter</artifactId>
+        <artifactId>cmd-starter</artifactId>
         <groupId>com.zhuolu</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>cmd-spring-boot-starter</artifactId>
-
-    <dependencyManagement>
-        <dependencies>
-
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -36,24 +30,22 @@
 
         <dependency>
             <groupId>com.zhuolu</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>cmd-core</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.zhuolu</groupId>
-            <artifactId>impl</artifactId>
+            <artifactId>cmd-impl</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.zhuolu</groupId>
-            <artifactId>net</artifactId>
+            <artifactId>cmd-net</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.zhuolu</groupId>
-            <artifactId>ext</artifactId>
+            <artifactId>cmd-ext</artifactId>
         </dependency>
     </dependencies>
-
-
 </project>

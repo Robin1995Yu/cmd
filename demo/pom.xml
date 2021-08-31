@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.zhuolu</groupId>
-    <artifactId>demo</artifactId>
+    <artifactId>cmd-demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>demo</name>
+    <name>cmd-demo</name>
     <description>demo</description>
     <properties>
         <java.version>1.8</java.version>
