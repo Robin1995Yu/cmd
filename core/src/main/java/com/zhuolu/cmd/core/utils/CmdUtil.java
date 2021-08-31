@@ -7,6 +7,7 @@ import com.zhuolu.cmd.core.factory.CmdFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -29,17 +30,14 @@ public final class CmdUtil {
         cmdFactoryMap = m;
     }
 
-    public void invoke(String cmd) {
-        invoke(initCmd(cmd));
+    public Iterator<String> invoke(String cmd) {
+        return invoke(initCmd(cmd));
     }
 
-    private void invoke(Cmd cmd) {
-        for (String line : cmd) {
-            cmdRuntime.getIoUtil().write(line);
-            cmdRuntime.getIoUtil().newLine();
-        }
-        cmdRuntime.getIoUtil().flush();
+    private Iterator<String> invoke(Cmd cmd) {
+        Iterator<String> iterator = cmd.iterator();
         cmd.destroy();
+        return iterator;
     }
 
     public Cmd initCmd(String line) {

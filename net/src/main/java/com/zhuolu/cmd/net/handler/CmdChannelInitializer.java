@@ -21,7 +21,7 @@ public class CmdChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel serverChannel) throws Exception {
-        CmdRuntime runtime = CmdRuntime.create(null, null, processes);
+        CmdRuntime runtime = CmdRuntime.create(processes);
         ChannelPipeline pipeline = serverChannel.pipeline();
         pipeline
                 .addLast(new LineBasedFrameDecoder(lineSize))

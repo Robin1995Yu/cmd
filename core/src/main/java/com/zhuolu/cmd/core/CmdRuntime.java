@@ -3,17 +3,13 @@ package com.zhuolu.cmd.core;
 import com.zhuolu.cmd.core.entry.process.CmdStartProcess;
 import com.zhuolu.cmd.core.utils.CmdUtil;
 import com.zhuolu.cmd.core.utils.ExportContextUtil;
-import com.zhuolu.cmd.core.utils.IOUtil;
 import com.zhuolu.cmd.core.utils.PathUtil;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class CmdRuntime implements AutoCloseable, Comparable<CmdRuntime> {
+public final class CmdRuntime implements Comparable<CmdRuntime> {
     private static AtomicInteger currId = new AtomicInteger(1);
     private final long id;
 
@@ -24,20 +20,18 @@ public final class CmdRuntime implements AutoCloseable, Comparable<CmdRuntime> {
     }
 
     private final ExportContextUtil exportContextUtil = new ExportContextUtil();
-    private final IOUtil ioUtil;
     private final PathUtil pathUtil = new PathUtil();
     private final CmdUtil cmdUtil;
     private volatile boolean runFlag = true;
 
-    private CmdRuntime(BufferedReader reader, BufferedWriter writer) {
+    private CmdRuntime() {
         id = getId();
-        ioUtil = new IOUtil(reader, writer);
         cmdUtil = new CmdUtil(this);
 
     }
 
-    public static CmdRuntime create(BufferedReader reader, BufferedWriter writer, List<CmdStartProcess> processes) {
-        CmdRuntime runtime = new CmdRuntime(reader, writer);
+    public static CmdRuntime create(List<CmdStartProcess> processes) {
+        CmdRuntime runtime = new CmdRuntime();
         for (CmdStartProcess process : processes) {
             process.process(runtime);
         }
@@ -46,10 +40,6 @@ public final class CmdRuntime implements AutoCloseable, Comparable<CmdRuntime> {
 
     public ExportContextUtil getExportContextUtil() {
         return exportContextUtil;
-    }
-
-    public IOUtil getIoUtil() {
-        return ioUtil;
     }
 
     public PathUtil getPathUtil() {
@@ -64,42 +54,8 @@ public final class CmdRuntime implements AutoCloseable, Comparable<CmdRuntime> {
         return runFlag;
     }
 
-    public void start() {
-        start(Collections.emptyList());
-    }
-
-    public void start(List<CmdStartProcess> processes) {
-        for (CmdStartProcess process : processes) {
-            process.process(this);
-        }
-        while (runFlag) {
-            try {
-                String line = ioUtil.reader().trim();
-                if (line.length() != 0) {
-                    cmdUtil.invoke(line);
-                }
-            } catch (Throwable e) {
-                ioUtil.write(e.toString());
-                ioUtil.newLine();
-                ioUtil.flush();
-            } finally {
-                String name = pathUtil.pwd().getName();
-                if (name.length() == 0) {
-                    name = "/";
-                }
-                ioUtil.write("->\t" + name + ">>");
-                ioUtil.flush();
-            }
-        }
-    }
-
-    public void exit(int status) {
+    public void exit(int i) {
         runFlag = false;
-    }
-
-    @Override
-    public void close() throws Exception {
-        ioUtil.close();
     }
 
     public ClassLoader getClassLoader() {
