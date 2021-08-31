@@ -10,8 +10,19 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public final class CmdRuntime implements AutoCloseable {
+public final class CmdRuntime implements AutoCloseable, Comparable<CmdRuntime> {
+    private static AtomicInteger currId = new AtomicInteger(1);
+    private final long id;
+
+    private static long getId() {
+        int currCount = currId.getAndIncrement();
+        long currSecond = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+        return (currSecond << 32) + currCount;
+    }
+
     private final ExportContextUtil exportContextUtil = new ExportContextUtil();
     private final IOUtil ioUtil;
     private final PathUtil pathUtil = new PathUtil();
@@ -19,6 +30,7 @@ public final class CmdRuntime implements AutoCloseable {
     private volatile boolean runFlag = true;
 
     private CmdRuntime(BufferedReader reader, BufferedWriter writer) {
+        id = getId();
         ioUtil = new IOUtil(reader, writer);
         cmdUtil = new CmdUtil(this);
 
@@ -92,5 +104,10 @@ public final class CmdRuntime implements AutoCloseable {
 
     public ClassLoader getClassLoader() {
         return getClass().getClassLoader();
+    }
+
+    @Override
+    public int compareTo(CmdRuntime other) {
+        return Long.compare(this.id, other.id);
     }
 }

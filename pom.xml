@@ -18,6 +18,7 @@
         <module>net</module>
         <module>ext</module>
         <module>test</module>
+        <module>listener</module>
     </modules>
     <packaging>pom</packaging>
     <dependencyManagement>

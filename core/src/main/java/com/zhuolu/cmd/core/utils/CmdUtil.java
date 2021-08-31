@@ -14,6 +14,8 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public final class CmdUtil {
+    private static final Map<CmdRuntime, CmdUtil> CMD_UTIL_MAP = new TreeMap<>();
+
     private final CmdRuntime cmdRuntime;
     private final Map<String, CmdFactory> cmdFactoryMap;
 
