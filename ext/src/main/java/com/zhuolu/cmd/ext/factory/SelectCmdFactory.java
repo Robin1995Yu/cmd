@@ -22,7 +22,7 @@ public class SelectCmdFactory implements CmdFactory {
         return new SelectCmd(previous, param, cmdRuntime, invokeHolderList);
     }
 
-    public void resetInvokeHandlerList(List<InvokeHolder> invokeHolderList) {
+    public synchronized void resetInvokeHandlerList(List<InvokeHolder> invokeHolderList) {
         if (invokeHolderList == null && invokeHolderList.isEmpty()) {
             throw new IllegalArgumentException("invoke holder can not be empty");
         }
