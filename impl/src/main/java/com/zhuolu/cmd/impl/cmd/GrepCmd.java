@@ -13,7 +13,7 @@ public class GrepCmd extends AbstractCmd {
     }
 
     @Override
-    protected void assertParam() {
+    protected void init() {
         if (param.isEmpty()) {
             throw new IllegalArgumentException("command \"grep\" must has at lest one param");
         }

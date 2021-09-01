@@ -29,14 +29,10 @@ public class InvokeCmd extends AbstractCmd {
     }
 
     @Override
-    protected void assertParam() {
+    protected void init() {
         if (param == null || param.isEmpty()) {
             throw new IllegalArgumentException("invoke cmd must has one param");
         }
-    }
-
-    @Override
-    protected void init() {
         String invokeString = param.get(0);
         // 处理字符串 分离出beanName methodName paramString 方便后续处理
         int i = invokeString.indexOf('(');

@@ -45,7 +45,7 @@ public class CatCmd extends AbstractCmd {
     }
 
     @Override
-    protected void assertParam() {
+    protected void init() {
         if (param == null || param.isEmpty()) {
             throw new IllegalArgumentException("cat's param can't be empty");
         }
@@ -57,10 +57,6 @@ public class CatCmd extends AbstractCmd {
                 throw new IllegalArgumentException("error option of cat");
             }
         }
-    }
-
-    @Override
-    protected void init() {
         lineHandlers = new TreeSet<>();
         if (param.get(0).startsWith("-")) {
             files = param.subList(1, param.size());

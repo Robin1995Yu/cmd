@@ -12,7 +12,6 @@ public abstract class AbstractCmd implements Cmd {
         this.previous = previous;
         this.param = param;
         this.cmdRuntime = cmdRuntime;
-        assertParam();
         init();
     }
 
@@ -36,8 +35,6 @@ public abstract class AbstractCmd implements Cmd {
     protected List<String> param;
 
     private final CmdRuntime cmdRuntime;
-
-    protected void assertParam() {}
 
     protected void init() {}
 

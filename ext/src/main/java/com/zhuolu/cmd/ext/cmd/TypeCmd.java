@@ -13,17 +13,13 @@ public class TypeCmd extends AbstractCmd {
         super("type", previous, param, cmdRuntime);
     }
 
-    @Override
-    protected void assertParam() {
-        if (param == null || param.isEmpty()) {
-            throw new IllegalArgumentException("type cmd must has one param");
-        }
-    }
-
     private Iterator<String> iterator;
 
     @Override
     public void init() {
+        if (param == null || param.isEmpty()) {
+            throw new IllegalArgumentException("type cmd must has one param");
+        }
         Object o = getCmdRuntime().getExportContextUtil().get(param.get(0));
         String name = o == null ? "null" : o.getClass().getName();
         iterator = new OnceIterator(name);

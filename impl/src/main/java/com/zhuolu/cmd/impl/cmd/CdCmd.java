@@ -12,7 +12,7 @@ public class CdCmd extends AbstractCmd {
     }
 
     @Override
-    protected void assertParam() {
+    protected void init() {
         if (param.size() >= 2) {
             throw new IllegalArgumentException("cd param length bigger then 1");
         }
