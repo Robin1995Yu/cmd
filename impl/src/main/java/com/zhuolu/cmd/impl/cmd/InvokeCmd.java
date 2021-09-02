@@ -5,7 +5,9 @@ import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.entry.cmd.iterator.BufferedReaderIterator;
+import com.zhuolu.cmd.core.factory.CmdFactory;
 import com.zhuolu.cmd.impl.domain.InvokeHolder;
+import com.zhuolu.cmd.impl.factory.ResultCmdFactory;
 import com.zhuolu.cmd.impl.factory.SelectCmdFactory;
 import com.zhuolu.cmd.impl.utils.CmdInvokeUtil;
 
@@ -92,7 +94,9 @@ public class InvokeCmd extends AbstractCmd {
                 Object bean = invokeHolder.getBean();
                 Method method = invokeHolder.getMethod();
                 Object[] args = invokeHolder.getArgs();
-                result = Objects.toString(method.invoke(bean, args));
+                ResultCmdFactory resultCmdFactory = (ResultCmdFactory) getCmdRuntime().getCmdUtil().getCmdFactory("result");
+                String key = resultCmdFactory.newKey();
+                this.result = invokeHolder.invoke(resultCmdFactory);
             } else {
                 StringBuilder sb = new StringBuilder();
                 int index = 0;

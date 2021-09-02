@@ -5,6 +5,7 @@ import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.entry.cmd.iterator.BufferedReaderIterator;
 import com.zhuolu.cmd.impl.domain.InvokeHolder;
+import com.zhuolu.cmd.impl.factory.ResultCmdFactory;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -39,11 +40,9 @@ public class SelectCmd extends AbstractCmd {
         } catch (Throwable t) {
             throw new IllegalArgumentException("do not has such context");
         }
-        Object bean = invokeHolder.getBean();
-        Method method = invokeHolder.getMethod();
-        Object[] args = invokeHolder.getArgs();
         try {
-            result = method.invoke(bean, args).toString();
+            ResultCmdFactory resultCmdFactory = (ResultCmdFactory) getCmdRuntime().getCmdUtil().getCmdFactory("result");
+            result = invokeHolder.invoke(resultCmdFactory);
         } catch (Throwable t) {
             throw new IllegalArgumentException(t);
         }

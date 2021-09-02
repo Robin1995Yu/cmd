@@ -7,5 +7,6 @@ com.zhuolu.cmd.impl.factory.InvokeCmdFactory
 com.zhuolu.cmd.impl.factory.LsCmdFactory
 com.zhuolu.cmd.impl.factory.PwdCmdFactory
 com.zhuolu.cmd.impl.factory.QuitCmdFactory
+com.zhuolu.cmd.impl.factory.ResultCmdFactory
 com.zhuolu.cmd.impl.factory.SelectCmdFactory
 com.zhuolu.cmd.impl.factory.TypeCmdFactory
