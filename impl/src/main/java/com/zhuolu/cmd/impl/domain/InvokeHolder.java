@@ -29,10 +29,10 @@ public class InvokeHolder {
         return args;
     }
 
-    public String invoke(ResultCmdFactory resultCmdFactory) throws InvocationTargetException, IllegalAccessException {
+    public String invoke(ResultCmdFactory resultCmdFactory, boolean isResult) throws InvocationTargetException, IllegalAccessException {
         Object result = method.invoke(bean, args);
         String resultString = "result:\t" + result;
-        if (result != null) {
+        if (result != null && isResult) {
             String key = resultCmdFactory.newKey();
             resultCmdFactory.addResult(key, result);
             resultString += "\nplease use result get \"" + key + "\" to get result object";

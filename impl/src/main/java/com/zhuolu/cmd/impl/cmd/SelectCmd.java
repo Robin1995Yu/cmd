@@ -10,7 +10,6 @@ import com.zhuolu.cmd.impl.factory.ResultCmdFactory;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +19,7 @@ public class SelectCmd extends AbstractCmd {
     private int index;
     private InvokeHolder invokeHolder;
     private String result;
+    private boolean isResult = false;
 
     public SelectCmd(Cmd previous, List<String> param, CmdRuntime cmdRuntime, List<InvokeHolder> invokeHolderList) {
         super("select", previous, param, cmdRuntime);
@@ -34,6 +34,9 @@ public class SelectCmd extends AbstractCmd {
         if (param.isEmpty()) {
             throw new IllegalArgumentException("select must has at least one param");
         }
+        if (param.size() > 1) {
+            isResult = "-r".equals(param.get(1)) || "--result".equals(param.get(1));
+        }
         index = Integer.valueOf(param.get(0));
         try {
             invokeHolder = invokeHolderList.get(index);
@@ -42,7 +45,7 @@ public class SelectCmd extends AbstractCmd {
         }
         try {
             ResultCmdFactory resultCmdFactory = (ResultCmdFactory) getCmdRuntime().getCmdUtil().getCmdFactory("result");
-            result = invokeHolder.invoke(resultCmdFactory);
+            result = invokeHolder.invoke(resultCmdFactory, isResult);
         } catch (Throwable t) {
             throw new IllegalArgumentException(t);
         }

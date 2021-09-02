@@ -5,7 +5,6 @@ import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.entry.cmd.iterator.BufferedReaderIterator;
-import com.zhuolu.cmd.core.factory.CmdFactory;
 import com.zhuolu.cmd.impl.domain.InvokeHolder;
 import com.zhuolu.cmd.impl.factory.ResultCmdFactory;
 import com.zhuolu.cmd.impl.factory.SelectCmdFactory;
@@ -20,11 +19,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 public class InvokeCmd extends AbstractCmd {
     private List<InvokeHolder> invokeHolderList;
     private String result;
+    private boolean isResult = false;
 
     public InvokeCmd(Cmd previous, List<String> param, CmdRuntime cmdRuntime) {
         super("invoke", previous, param, cmdRuntime);
@@ -36,6 +35,9 @@ public class InvokeCmd extends AbstractCmd {
             throw new IllegalArgumentException("invoke cmd must has one param");
         }
         String invokeString = param.get(0);
+        if (param.size() > 1) {
+            isResult = "-r".equals(param.get(1)) || "--result".equals(param.get(1));
+        }
         // 处理字符串 分离出beanName methodName paramString 方便后续处理
         int i = invokeString.indexOf('(');
         if (i < 0 || !invokeString.endsWith(")")) {
@@ -91,12 +93,8 @@ public class InvokeCmd extends AbstractCmd {
         try {
             if (invokeHolderList.size() == 1) {
                 InvokeHolder invokeHolder = invokeHolderList.get(0);
-                Object bean = invokeHolder.getBean();
-                Method method = invokeHolder.getMethod();
-                Object[] args = invokeHolder.getArgs();
                 ResultCmdFactory resultCmdFactory = (ResultCmdFactory) getCmdRuntime().getCmdUtil().getCmdFactory("result");
-                String key = resultCmdFactory.newKey();
-                this.result = invokeHolder.invoke(resultCmdFactory);
+                this.result = invokeHolder.invoke(resultCmdFactory, isResult);
             } else {
                 StringBuilder sb = new StringBuilder();
                 int index = 0;
