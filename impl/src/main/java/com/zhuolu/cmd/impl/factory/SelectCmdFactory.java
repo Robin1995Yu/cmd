@@ -1,10 +1,10 @@
-package com.zhuolu.cmd.ext.factory;
+package com.zhuolu.cmd.impl.factory;
 
 import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.factory.CmdFactory;
-import com.zhuolu.cmd.ext.cmd.SelectCmd;
-import com.zhuolu.cmd.ext.domain.InvokeHolder;
+import com.zhuolu.cmd.impl.cmd.SelectCmd;
+import com.zhuolu.cmd.impl.domain.InvokeHolder;
 
 import java.util.ArrayList;
 import java.util.List;

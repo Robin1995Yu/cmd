@@ -16,7 +16,6 @@
         <module>demo</module>
         <module>impl</module>
         <module>net</module>
-        <module>ext</module>
         <module>test</module>
     </modules>
     <packaging>pom</packaging>

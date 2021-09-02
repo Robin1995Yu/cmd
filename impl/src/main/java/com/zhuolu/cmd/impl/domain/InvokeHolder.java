@@ -1,4 +1,4 @@
-package com.zhuolu.cmd.ext.domain;
+package com.zhuolu.cmd.impl.domain;
 
 import java.lang.reflect.Method;
 

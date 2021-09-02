@@ -17,4 +17,14 @@ public class CmdProperties {
      * cmd max line size
      */
     private Integer lineSize;
+
+    /**
+     * netty boosSize
+     */
+    private Integer boosSize;
+
+    /**
+     * netty workerSize
+     */
+    private Integer workerSize;
 }

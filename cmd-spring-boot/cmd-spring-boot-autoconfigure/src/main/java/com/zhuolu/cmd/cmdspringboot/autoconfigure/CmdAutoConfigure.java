@@ -21,16 +21,26 @@ public class CmdAutoConfigure {
     public CmdServer cmdSocketServer(CmdProperties cmdProperties) throws InterruptedException {
         Integer port = 5200;
         Integer lineSize = 1024;
+        Integer boosSize = -1;
+        Integer workerSize = -1;
         if (cmdProperties.getPort() != null && cmdProperties.getPort() > 0) {
             port = cmdProperties.getPort();
         }
         if (cmdProperties.getLineSize() != null && cmdProperties.getLineSize() > 1024) {
             lineSize = cmdProperties.getLineSize();
         }
+        if (cmdProperties.getBoosSize() != null && cmdProperties.getBoosSize() > 0) {
+            boosSize = cmdProperties.getBoosSize();
+        }
+        if (cmdProperties.getWorkerSize() != null && cmdProperties.getWorkerSize() > 0) {
+            workerSize = cmdProperties.getWorkerSize();
+        }
         CmdServer cmdServer = CmdServer.getBuilder()
                 .processes(processes)
                 .port(port)
-                .lineSize(lineSize).build();
+                .lineSize(lineSize)
+                .parentChildGroupSize(boosSize, workerSize)
+                .build();
         cmdServer.run();
         return cmdServer;
     }

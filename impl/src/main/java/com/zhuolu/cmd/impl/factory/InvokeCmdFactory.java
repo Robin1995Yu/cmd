@@ -1,9 +1,9 @@
-package com.zhuolu.cmd.ext.factory;
+package com.zhuolu.cmd.impl.factory;
 
 import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.factory.CmdFactory;
-import com.zhuolu.cmd.ext.cmd.InvokeCmd;
+import com.zhuolu.cmd.impl.cmd.InvokeCmd;
 
 import java.util.List;
 
