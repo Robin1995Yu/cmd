@@ -7,4 +7,5 @@ public interface TestService {
     String selectTest(TestBean1 testBean1);
     String selectTest(TestBean2 testBean2);
     String sayHello(String name);
+    Runnable getRunnable(String s);
 }
