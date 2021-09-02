@@ -16,4 +16,12 @@ public class TestServiceImpl implements TestService {
     public String selectTest(TestBean2 testBean2) {
         return "this is testbean2" + testBean2;
     }
+
+    @Override
+    public String sayHello(String name) {
+        if (name == null || name.length() == 0) {
+            name = "wenjin";
+        }
+        return "fuck you " + name;
+    }
 }
