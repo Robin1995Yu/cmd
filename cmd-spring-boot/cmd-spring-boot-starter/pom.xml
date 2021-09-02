@@ -42,10 +42,5 @@
             <groupId>com.zhuolu</groupId>
             <artifactId>cmd-net</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.zhuolu</groupId>
-            <artifactId>cmd-ext</artifactId>
-        </dependency>
     </dependencies>
 </project>

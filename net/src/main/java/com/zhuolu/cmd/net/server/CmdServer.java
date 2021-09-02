@@ -35,10 +35,6 @@ public class CmdServer {
         ChannelFuture sync = bootstrap.bind().sync();
     }
 
-    public static void main(String[] args) throws InterruptedException, IOException {
-        CmdServer.getBuilder().build().run();
-    }
-
     public static CmdServerBuilder getBuilder() {
         return new CmdServerBuilder();
     }

@@ -1,4 +1,4 @@
-package com.zhuolu.cmd.ext.cmd;
+package com.zhuolu.cmd.impl.cmd;
 
 import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
