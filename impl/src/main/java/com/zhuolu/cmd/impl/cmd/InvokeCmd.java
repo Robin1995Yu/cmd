@@ -23,7 +23,7 @@ import java.util.List;
 public class InvokeCmd extends AbstractCmd {
     private List<InvokeHolder> invokeHolderList;
     private String result;
-    private boolean isResult = false;
+    private boolean isResult;
 
     public InvokeCmd(Cmd previous, List<String> param, CmdRuntime cmdRuntime) {
         super("invoke", previous, param, cmdRuntime);
@@ -37,6 +37,8 @@ public class InvokeCmd extends AbstractCmd {
         String invokeString = param.get(0);
         if (param.size() > 1) {
             isResult = "-r".equals(param.get(1)) || "--result".equals(param.get(1));
+        } else {
+            isResult = false;
         }
         // 处理字符串 分离出beanName methodName paramString 方便后续处理
         int i = invokeString.indexOf('(');

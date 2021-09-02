@@ -17,19 +17,8 @@ public class InvokeHolder {
         this.args = args;
     }
 
-    public Object getBean() {
-        return bean;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public Object[] getArgs() {
-        return args;
-    }
-
     public String invoke(ResultCmdFactory resultCmdFactory, boolean isResult) throws InvocationTargetException, IllegalAccessException {
+        method.setAccessible(true);
         Object result = method.invoke(bean, args);
         String resultString = "result:\t" + result;
         if (result != null && isResult) {
