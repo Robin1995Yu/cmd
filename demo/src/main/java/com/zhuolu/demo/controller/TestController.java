@@ -22,4 +22,9 @@ public class TestController {
     public String a() {
         return "<center><h1>王张伟为什么还不退群？</h1></center>";
     }
+
+    @GetMapping("/b")
+    public String b() {
+        return "<center><h1>刘严严是聪明蛋</h1></center>";
+    }
 }
