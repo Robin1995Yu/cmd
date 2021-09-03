@@ -22,7 +22,7 @@ public class InvokeHolder {
         if (result != null && isResult) {
             String key = resultCmdFactory.newKey();
             resultCmdFactory.addResult(key, result);
-            resultString += "\nplease use result get \"" + key + "\" to get result object";
+            resultString += "\nplease use cmd \"result get " + key + "\" to get result object";
         }
         return resultString;
     }
