@@ -4,7 +4,6 @@ import com.zhuolu.cmd.impl.factory.ResultCmdFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 public class InvokeHolder {
     private final Object bean;
@@ -15,18 +14,6 @@ public class InvokeHolder {
         this.bean = bean;
         this.method = method;
         this.args = args;
-    }
-
-    public Object getBean() {
-        return bean;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public Object[] getArgs() {
-        return args;
     }
 
     public String invoke(ResultCmdFactory resultCmdFactory, boolean isResult) throws InvocationTargetException, IllegalAccessException {
