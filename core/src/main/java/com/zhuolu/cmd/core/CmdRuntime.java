@@ -1,62 +1,63 @@
 package com.zhuolu.cmd.core;
 
 import com.zhuolu.cmd.core.entry.process.CmdStartProcess;
+import com.zhuolu.cmd.core.impl.CmdRuntimeImpl;
 import com.zhuolu.cmd.core.utils.CmdUtil;
 import com.zhuolu.cmd.core.utils.ExportContextUtil;
 import com.zhuolu.cmd.core.utils.PathUtil;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public final class CmdRuntime {
-    private static AtomicInteger currId = new AtomicInteger(1);
+/**
+ * Cmd运行时上下文 每一个Cmd session会包含一个唯一的CmdRuntime
+ * @author zhuolu
+ */
+public interface CmdRuntime {
 
-    private static long getId() {
-        int currCount = currId.getAndIncrement();
-        long currSecond = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-        return (currSecond << 32) + currCount;
-    }
-
-    private final ExportContextUtil exportContextUtil = new ExportContextUtil();
-    private final PathUtil pathUtil = new PathUtil();
-    private final CmdUtil cmdUtil;
-    private volatile boolean runFlag = true;
-
-    private CmdRuntime() {
-        cmdUtil = new CmdUtil(this);
-
-    }
-
-    public static CmdRuntime create(List<CmdStartProcess> processes) {
-        CmdRuntime runtime = new CmdRuntime();
+    /**
+     * 默认实现的创建
+     * @param processes 前置任务
+     * @return
+     */
+    static CmdRuntime create(List<CmdStartProcess> processes) {
+        CmdRuntime runtime = new CmdRuntimeImpl();
         for (CmdStartProcess process : processes) {
             process.process(runtime);
         }
         return runtime;
     }
 
-    public ExportContextUtil getExportContextUtil() {
-        return exportContextUtil;
-    }
+    /**
+     * 返回参数的上下文
+     * @return
+     * @see com.zhuolu.cmd.core.utils.ExportContextUtil
+     */
+    ExportContextUtil getExportContextUtil();
 
-    public PathUtil getPathUtil() {
-        return pathUtil;
-    }
+    /**
+     * 返回路径上下文
+     * @return
+     * @see com.zhuolu.cmd.core.utils.PathUtil
+     */
+    PathUtil getPathUtil();
 
-    public CmdUtil getCmdUtil() {
-        return cmdUtil;
-    }
+    /**
+     * 返回命令上下文
+     * @return
+     * @see com.zhuolu.cmd.core.utils.CmdUtil
+     */
+    CmdUtil getCmdUtil();
 
-    public boolean isRunFlag() {
-        return runFlag;
-    }
+    /**
+     * 当前CmdRuntime是否还在运行
+     * 不会影响CmdRuntime的正常功能 用户可以通过判断这个状态来判断是否结束回话
+     * @return
+     */
+    boolean isRunFlag();
 
-    public void exit(int i) {
-        runFlag = false;
-    }
-
-    public ClassLoader getClassLoader() {
-        return getClass().getClassLoader();
-    }
+    /**
+     * 退出 在调用这个方法后 isRunFlag用于返回false
+     * @param i
+     */
+    void exit(int i);
 }

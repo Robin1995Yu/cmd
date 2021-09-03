@@ -8,14 +8,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 public class CmdServer {
-    private final int parentGroupSize;
-    private final int childGroupSize;
-    private final int singleGroupSize;
     private final int port;
     private final int lineSize;
 
@@ -40,9 +36,6 @@ public class CmdServer {
     }
 
     private CmdServer(int parentGroupSize, int childGroupSize, int singleGroupSize, int port, int lineSize, List<CmdStartProcess> processes) {
-        this.parentGroupSize = parentGroupSize;
-        this.childGroupSize = childGroupSize;
-        this.singleGroupSize = singleGroupSize;
         this.port = port;
         this.lineSize = lineSize;
         this.processes = processes == null ? Collections.emptyList() : processes;
