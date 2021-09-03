@@ -24,4 +24,9 @@ public class TestServiceImpl implements TestService {
         }
         return "fuck you " + name;
     }
+
+    @Override
+    public Runnable getRunnable(String s) {
+        return () -> System.out.println(s);
+    }
 }
