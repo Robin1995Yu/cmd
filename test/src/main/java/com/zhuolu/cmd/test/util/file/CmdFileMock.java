@@ -8,18 +8,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Set;
 
 public abstract class CmdFileMock implements CmdFile {
-    private static boolean FILE_FLAG = true;
-    private static boolean DIRECTORY_FLAG = false;
+    private final String name;
 
-    private boolean type;
+    private final DirectoryCmdFileMock parent;
 
-    private String name;
-
-    private CmdFileMock parent;
-    private Set<CmdFileMock> children;
+    protected CmdFileMock(String name, DirectoryCmdFileMock parent) {
+        this.name = name;
+        this.parent = parent;
+    }
 
     @Override
     public String getAbsolutePath() {
@@ -33,56 +31,56 @@ public abstract class CmdFileMock implements CmdFile {
 
     @Override
     public List<CmdFile> ls() {
-        return null;
+        throw new UnsupportedOperationException("ls");
     }
 
     @Override
-    public CmdFile getParent() {
-        return null;
+    public DirectoryCmdFileMock getParent() {
+        return parent;
     }
 
     @Override
     public CmdFile getPath(String path) {
-        return null;
+        throw new UnsupportedOperationException("getPath");
     }
 
     @Override
     public InputStream getInputStream() throws FileNotFoundException {
-        return null;
+        throw new UnsupportedOperationException("getInputStream");
     }
 
     @Override
     public OutputStream getOutputStream() throws FileNotFoundException {
-        return null;
+        throw new UnsupportedOperationException("getInputStream");
     }
 
     @Override
     public boolean exists() {
-        return false;
+        return parent == null ? false : parent.ls().contains(this);
     }
 
     @Override
     public boolean isDirectory() {
-        return false;
+        throw new UnsupportedOperationException("isDirectory");
     }
 
     @Override
     public boolean isFile() {
-        return false;
+        throw new UnsupportedOperationException("isFile");
     }
 
     @Override
     public boolean createDirectory() {
-        return false;
+        throw new UnsupportedOperationException("createDirectory");
     }
 
     @Override
     public boolean createDirectories() {
-        return false;
+        throw new UnsupportedOperationException("createDirectories");
     }
 
     @Override
     public boolean createFile() throws IOException {
-        return false;
+        throw new UnsupportedOperationException("createFile");
     }
 }
