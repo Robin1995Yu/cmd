@@ -2,40 +2,33 @@ package com.zhuolu.cmd.core.utils;
 
 import java.io.File;
 
-public final class PathUtil {
-    private static final File HOME = new File(System.getProperty("user.home"));
-    private File pwd = HOME;
+/**
+ * 路径的工具类 表示当前运行的路径状态
+ * @see com.zhuolu.cmd.core.CmdRuntime
+ * @author zhuolu
+ */
+public interface PathUtil {
+    /**
+     * 获取当前的Path
+     * @return 当前的Path的文件
+     */
+    File pwd();
 
-    public PathUtil() {}
+    /**
+     * 获取要切换到的路径所指代的File
+     * 如果是<b> / </b>开头的 会认为是绝对路径
+     * 如果非<b> / </b>开头的 会认为是相对路径 会去当前路径作为父路径
+     * 如果是空字符串 会转到home
+     * 如果是<b> .. </b>会到上级目录
+     * 如果是<b> . </b>会到当前目录
+     * @param path 要跳转的path字符串
+     * @return 跳转后的File对象
+     */
+    File getPath(String path);
 
-    public File pwd() {
-        return pwd;
-    }
-
-    public File getPath(String path) {
-        File result;
-        if (path.isEmpty()) {
-            result = HOME;
-        }else if (path.startsWith("/")) {
-            result = new File(path);
-        } else if (".".equals(path)) {
-            result = pwd;
-        } else if ("..".equals(path)) {
-            result = pwd.getParentFile();
-            if (result == null) {
-                result = pwd;
-            }
-        }
-        else {
-            result = new File(pwd, path);
-        }
-        if (!result.exists()) {
-            throw new IllegalArgumentException("no such file:" + result.getAbsolutePath());
-        }
-        return result;
-    }
-
-    public void cd(String path) {
-        pwd = getPath(path);
-    }
+    /**
+     * 切换路径
+     * @param path 路径名称
+     */
+    void cd(String path);
 }

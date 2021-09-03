@@ -71,7 +71,6 @@ public class CatCmd extends AbstractCmd {
         } else {
             files = param;
         }
-        File pwd = getCmdRuntime().getPathUtil().pwd();
         List<InputStream> inputStreams = new ArrayList<>(files.size());
         for (String file : files) {
             File f = getCmdRuntime().getPathUtil().getPath(file);
@@ -98,7 +97,6 @@ public class CatCmd extends AbstractCmd {
     }
 
     private static LineHandler getLineHandler(char c) {
-        //benstuv
         switch (c) {
             case 'b':
                 return new BLineHandler();
