@@ -12,7 +12,7 @@ public interface PathUtil {
      * 获取当前的Path
      * @return 当前的Path的文件
      */
-    File pwd();
+    CmdFile pwd();
 
     /**
      * 获取要切换到的路径所指代的File
@@ -24,7 +24,7 @@ public interface PathUtil {
      * @param path 要跳转的path字符串
      * @return 跳转后的File对象
      */
-    File getPath(String path);
+    CmdFile getPath(String path);
 
     /**
      * 切换路径

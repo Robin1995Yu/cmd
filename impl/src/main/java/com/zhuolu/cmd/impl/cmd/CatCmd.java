@@ -4,6 +4,7 @@ import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.entry.cmd.iterator.BufferedReaderIterator;
 import com.zhuolu.cmd.core.CmdRuntime;
+import com.zhuolu.cmd.core.utils.CmdFile;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -73,7 +74,7 @@ public class CatCmd extends AbstractCmd {
         }
         List<InputStream> inputStreams = new ArrayList<>(files.size());
         for (String file : files) {
-            File f = getCmdRuntime().getPathUtil().getPath(file);
+            CmdFile f = getCmdRuntime().getPathUtil().getPath(file);
             if (!f.exists()) {
                 throw new IllegalArgumentException("no such file:" + f.getAbsolutePath());
             }
@@ -81,7 +82,7 @@ public class CatCmd extends AbstractCmd {
                 throw new IllegalArgumentException(f.getAbsolutePath() + " is not a file");
             }
             try {
-                inputStreams.add(new FileInputStream(f));
+                inputStreams.add(f.getInputStream());
             } catch (FileNotFoundException e) {
             }
         }

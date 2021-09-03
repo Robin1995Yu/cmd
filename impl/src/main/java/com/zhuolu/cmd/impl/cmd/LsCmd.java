@@ -3,6 +3,7 @@ package com.zhuolu.cmd.impl.cmd;
 import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.CmdRuntime;
+import com.zhuolu.cmd.core.utils.CmdFile;
 
 import java.io.File;
 import java.util.Arrays;
@@ -17,17 +18,17 @@ public class LsCmd extends AbstractCmd {
         super("ls", previous, param, cmdRuntime);
     }
 
-    private Map<File, Iterator<File>> fileMap;
+    private Map<CmdFile, Iterator<CmdFile>> fileMap;
 
     @Override
     protected void init() {
         fileMap = new TreeMap<>();
-        File pwd = getCmdRuntime().getPathUtil().pwd();
+        CmdFile pwd = getCmdRuntime().getPathUtil().pwd();
         if (param.isEmpty()) {
             fileMap.put(pwd, null);
         } else {
             for (String fileName : param) {
-                File f = getCmdRuntime().getPathUtil().getPath(fileName);
+                CmdFile f = getCmdRuntime().getPathUtil().getPath(fileName);
                 if (!f.exists() || !f.isDirectory()) {
                     throw new IllegalArgumentException(fileName + " is not exists or is a dictory");
                 }
@@ -42,15 +43,15 @@ public class LsCmd extends AbstractCmd {
     }
 
     private class Itr implements Iterator<String> {
-        private Iterator<Map.Entry<File, Iterator<File>>> entryIterator = fileMap.entrySet().iterator();
-        private Iterator<File> fileIterator;
+        private Iterator<Map.Entry<CmdFile, Iterator<CmdFile>>> entryIterator = fileMap.entrySet().iterator();
+        private Iterator<CmdFile> fileIterator;
 
         private String curr;
         private String next;
 
 
         {
-            Map.Entry<File, Iterator<File>> root = entryIterator.next();
+            Map.Entry<CmdFile, Iterator<CmdFile>> root = entryIterator.next();
             fileIterator = doLs(root);
             next = root.getKey().getName() + ":";
             if (!entryIterator.hasNext()) {
@@ -76,21 +77,21 @@ public class LsCmd extends AbstractCmd {
             if (fileIterator.hasNext()) {
                 return fileIterator.next().getName();
             }
-            Map.Entry<File, Iterator<File>> root = entryIterator.next();
+            Map.Entry<CmdFile, Iterator<CmdFile>> root = entryIterator.next();
             fileIterator = doLs(root);
             return root.getKey().getName() + ":";
         }
 
     }
 
-    private static Iterator<File> doLs(Map.Entry<File, Iterator<File>> entry) {
+    private static Iterator<CmdFile> doLs(Map.Entry<CmdFile, Iterator<CmdFile>> entry) {
         if (entry.getValue() == null) {
             entry.setValue(doLs(entry.getKey()));
         }
         return entry.getValue();
     }
 
-    private static Iterator<File> doLs(File path) {
-        return Arrays.stream(path.listFiles()).collect(Collectors.toList()).iterator();
+    private static Iterator<CmdFile> doLs(CmdFile path) {
+        return path.ls().iterator();
     }
 }

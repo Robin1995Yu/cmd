@@ -17,4 +17,9 @@ public class TestController {
     public String sayHello(@RequestParam String name) {
         return name + "你是狗吧";
     }
+
+    @GetMapping("/a")
+    public String a() {
+        return "<center><h1>王张伟为什么还不退群？</h1></center>";
+    }
 }

@@ -1,37 +1,38 @@
 package com.zhuolu.cmd.core.utils.impl;
 
+import com.zhuolu.cmd.core.utils.CmdFile;
 import com.zhuolu.cmd.core.utils.PathUtil;
 
 import java.io.File;
 
 public final class PathUtilImpl implements PathUtil {
-    private static final File HOME = new File(System.getProperty("user.home"));
-    private File pwd = HOME;
+    private static final CmdFile HOME = new CmdFileImpl(new File(System.getProperty("user.home")));
+    private CmdFile pwd = HOME;
 
     public PathUtilImpl() {}
 
     @Override
-    public File pwd() {
+    public CmdFile pwd() {
         return pwd;
     }
 
     @Override
-    public File getPath(String path) {
-        File result;
+    public CmdFile getPath(String path) {
+        CmdFile result;
         if (path.isEmpty()) {
             result = HOME;
         }else if (path.startsWith("/")) {
-            result = new File(path);
+            result = new CmdFileImpl(new File(path));
         } else if (".".equals(path)) {
             result = pwd;
         } else if ("..".equals(path)) {
-            result = pwd.getParentFile();
+            result = pwd.getParent();
             if (result == null) {
                 result = pwd;
             }
         }
         else {
-            result = new File(pwd, path);
+            result = pwd.getPath(path);
         }
         if (!result.exists()) {
             throw new IllegalArgumentException("no such file:" + result.getAbsolutePath());
@@ -41,6 +42,12 @@ public final class PathUtilImpl implements PathUtil {
 
     @Override
     public void cd(String path) {
-        pwd = getPath(path);
+        CmdFile t = getPath(path);
+        if (t.isDirectory()) {
+            pwd = t;
+        } else {
+            throw new IllegalArgumentException(t.getAbsolutePath() + " is not a directory");
+        }
+
     }
 }

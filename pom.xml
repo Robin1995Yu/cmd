@@ -16,6 +16,7 @@
         <module>demo</module>
         <module>impl</module>
         <module>net</module>
+        <module>test</module>
     </modules>
     <packaging>pom</packaging>
     <dependencyManagement>
