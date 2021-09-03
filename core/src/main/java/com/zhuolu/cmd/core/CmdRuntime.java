@@ -9,9 +9,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class CmdRuntime implements Comparable<CmdRuntime> {
+public final class CmdRuntime {
     private static AtomicInteger currId = new AtomicInteger(1);
-    private final long id;
 
     private static long getId() {
         int currCount = currId.getAndIncrement();
@@ -25,7 +24,6 @@ public final class CmdRuntime implements Comparable<CmdRuntime> {
     private volatile boolean runFlag = true;
 
     private CmdRuntime() {
-        id = getId();
         cmdUtil = new CmdUtil(this);
 
     }
@@ -60,10 +58,5 @@ public final class CmdRuntime implements Comparable<CmdRuntime> {
 
     public ClassLoader getClassLoader() {
         return getClass().getClassLoader();
-    }
-
-    @Override
-    public int compareTo(CmdRuntime other) {
-        return Long.compare(this.id, other.id);
     }
 }
