@@ -64,9 +64,13 @@ public final class CmdInvokeUtil {
             if (paramClass == Character.class) {
                 return stringParam.charAt(0);
             }
-            if (CharSequence.class.isAssignableFrom(paramClass)) {
+            if (String.class == paramClass) {
                 return stringParam;
             }
+            if (paramClass.isEnum()) {
+                return Enum.valueOf((Class<Enum>) paramClass, stringParam);
+            }
+            // 以下为时间类型的
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date dateParam = sdf.parse(stringParam);
             if (paramClass == Date.class) {
@@ -175,6 +179,7 @@ public final class CmdInvokeUtil {
             for (Object o : paramCollection) {
                 result.add(getParam(o, eClass, eType));
             }
+            return result;
         }
         if (param instanceof Map) {
             Map<?, ?> mapParam = (Map<?, ?>) param;
