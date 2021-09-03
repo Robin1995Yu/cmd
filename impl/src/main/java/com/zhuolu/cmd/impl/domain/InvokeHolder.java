@@ -17,6 +17,7 @@ public class InvokeHolder {
     }
 
     public String invoke(ResultCmdFactory resultCmdFactory, boolean isResult) throws InvocationTargetException, IllegalAccessException {
+        method.setAccessible(true);
         Object result = method.invoke(bean, args);
         String resultString = "result:\t" + result;
         if (result != null && isResult) {
