@@ -25,6 +25,6 @@ public class TestController {
 
     @GetMapping("/b")
     public String b() {
-        return "<center><h1>刘严严是聪明蛋</h1></center>";
+        return "<center><h1>王张伟吃屎</h1></center>";
     }
 }
