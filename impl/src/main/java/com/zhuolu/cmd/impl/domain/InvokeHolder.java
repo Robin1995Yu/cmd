@@ -1,5 +1,6 @@
 package com.zhuolu.cmd.impl.domain;
 
+import com.alibaba.fastjson.JSON;
 import com.zhuolu.cmd.impl.factory.ResultCmdFactory;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,7 +20,7 @@ public class InvokeHolder {
     public String invoke(ResultCmdFactory resultCmdFactory, boolean isResult) throws InvocationTargetException, IllegalAccessException {
         method.setAccessible(true);
         Object result = method.invoke(bean, args);
-        String resultString = "result:\t" + result;
+        String resultString = "result:\t" + JSON.toJSONString(result);
         if (result != null && isResult) {
             String key = resultCmdFactory.newKey();
             resultCmdFactory.addResult(key, result);
