@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
+import java.util.Collection;
 
 public interface CmdFile extends Comparable<CmdFile> {
     String SEPARATOR = File.separator;
@@ -14,7 +14,7 @@ public interface CmdFile extends Comparable<CmdFile> {
 
     String getName();
 
-    List<CmdFile> ls();
+    Collection<CmdFile> ls();
 
     CmdFile getParent();
 
