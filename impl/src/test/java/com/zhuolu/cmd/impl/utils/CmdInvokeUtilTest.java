@@ -20,15 +20,15 @@ public class CmdInvokeUtilTest {
     public void getMethod() throws NoSuchMethodException {
         Class<TestClass> type = TestClass.class;
         List<Object> paramPrimitive = Collections.singletonList(1);
-        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "primitive", paramPrimitive).get(0), type.getMethod("primitive", int.class));
+        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "primitive", paramPrimitive, false).get(0), type.getMethod("primitive", int.class));
         List<Object> paramT = Collections.singletonList(new HashMap<>());
-        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "bean", paramT).get(0), type.getMethod("bean", TestBean.class));
-        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "bean", paramT).get(1), type.getMethod("bean", Map.class));
+        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "bean", paramT, false).get(0), type.getMethod("bean", TestBean.class));
+        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "bean", paramT, false).get(1), type.getMethod("bean", Map.class));
         List<Object> paramList = Collections.singletonList(Collections.singletonList("abcd"));
-        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "list", paramList).get(0), type.getMethod("list", List.class));
+        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "list", paramList, false).get(0), type.getMethod("list", List.class));
         List<Object> paramListT = Collections.singletonList(Collections.singletonList(new HashMap<>()));
-        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "listT", paramListT).get(0), type.getMethod("listT", List.class));
-        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "listW", paramListT).get(0), type.getMethod("listW", List.class));
+        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "listT", paramListT, false).get(0), type.getMethod("listT", List.class));
+        Assert.assertEquals(CmdInvokeUtil.getMethod(type, "listW", paramListT, false).get(0), type.getMethod("listW", List.class));
     }
 
     @Test

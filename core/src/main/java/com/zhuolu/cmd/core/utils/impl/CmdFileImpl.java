@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CmdFileImpl implements CmdFile {
@@ -31,9 +33,9 @@ public class CmdFileImpl implements CmdFile {
     }
 
     @Override
-    public List<CmdFile> ls() {
+    public Collection<CmdFile> ls() {
         File[] files = file.listFiles();
-        return Arrays.stream(files).map(CmdFileImpl::new).collect(Collectors.toList());
+        return Arrays.stream(files).map(CmdFileImpl::new).collect(Collectors.toSet());
     }
 
     @Override

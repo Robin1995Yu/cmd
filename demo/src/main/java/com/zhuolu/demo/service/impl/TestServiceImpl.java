@@ -1,13 +1,15 @@
 package com.zhuolu.demo.service.impl;
 
+import com.zhuolu.cmd.impl.annotation.CmdInvokeIgnore;
 import com.zhuolu.demo.domain.TestBean1;
 import com.zhuolu.demo.domain.TestBean2;
 import com.zhuolu.demo.service.TestService;
 import org.springframework.stereotype.Service;
 
-@Service("testService")
+@Service
 public class TestServiceImpl implements TestService {
     @Override
+    @CmdInvokeIgnore
     public String selectTest(TestBean1 testBean1) {
         return "this is testbean1" + testBean1;
     }

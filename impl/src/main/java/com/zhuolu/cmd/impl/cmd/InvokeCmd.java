@@ -5,6 +5,7 @@ import com.zhuolu.cmd.core.CmdRuntime;
 import com.zhuolu.cmd.core.entry.cmd.AbstractCmd;
 import com.zhuolu.cmd.core.entry.cmd.Cmd;
 import com.zhuolu.cmd.core.entry.cmd.iterator.BufferedReaderIterator;
+import com.zhuolu.cmd.impl.annotation.CmdInvokeIgnore;
 import com.zhuolu.cmd.impl.domain.InvokeHolder;
 import com.zhuolu.cmd.impl.factory.ResultCmdFactory;
 import com.zhuolu.cmd.impl.factory.SelectCmdFactory;
@@ -24,6 +25,7 @@ public class InvokeCmd extends AbstractCmd {
     private List<InvokeHolder> invokeHolderList;
     private String result;
     private boolean isResult;
+    private boolean isStatic;
 
     public InvokeCmd(Cmd previous, List<String> param, CmdRuntime cmdRuntime) {
         super("invoke", previous, param, cmdRuntime);
@@ -35,11 +37,8 @@ public class InvokeCmd extends AbstractCmd {
             throw new IllegalArgumentException("invoke cmd must has one param");
         }
         String invokeString = param.get(0);
-        if (param.size() > 1) {
-            isResult = "-r".equals(param.get(1)) || "--result".equals(param.get(1));
-        } else {
-            isResult = false;
-        }
+        isResult = param.contains("-r") || param.contains("--result");
+        isStatic = param.contains("-s") || param.contains("--static");
         // 处理字符串 分离出beanName methodName paramString 方便后续处理
         int i = invokeString.indexOf('(');
         if (i < 0 || !invokeString.endsWith(")")) {
@@ -51,14 +50,27 @@ public class InvokeCmd extends AbstractCmd {
         String beanMethodName = invokeString.substring(0, i);
         int cmSplit = invokeString.lastIndexOf('.');
         // bean名字
-        String beanName = beanMethodName.substring(0, cmSplit);
+        String beanOrClassName = beanMethodName.substring(0, cmSplit);
         // 方法名
         String methodName = beanMethodName.substring(cmSplit + 1);
-        Object bean = getCmdRuntime().getExportContextUtil().get(beanName);
-        if (bean == null) {
-            throw new IllegalArgumentException("no such bean:" + beanName);
+        Object bean = null;
+        Class<?> c;
+        if (isStatic) {
+            try {
+                c = Class.forName(beanOrClassName);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException(e);
+            }
+        } else {
+            bean = getCmdRuntime().getExportContextUtil().get(beanOrClassName);
+            if (bean == null) {
+                throw new IllegalArgumentException("no such bean:" + beanOrClassName);
+            }
+            c = bean.getClass();
+            if (c.getAnnotation(CmdInvokeIgnore.class) != null) {
+                throw new IllegalArgumentException("no such bean:" + beanOrClassName);
+            }
         }
-        Class<?> c = bean.getClass();
         List<Object> paramList;
         try {
             paramList = JSON.parseArray("[" + paramString + "]");
@@ -66,7 +78,7 @@ public class InvokeCmd extends AbstractCmd {
             throw new IllegalArgumentException(t);
         }
         // 找同名同参数数量的方法
-        List<Method> methodList = CmdInvokeUtil.getMethod(c, methodName, paramList);
+        List<Method> methodList = CmdInvokeUtil.getMethod(c, methodName, paramList, isStatic);
         if (methodList.isEmpty()) {
             throw new IllegalArgumentException("no such method:" + methodName);
         }
