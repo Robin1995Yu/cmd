@@ -4,8 +4,8 @@ import com.zhuolu.cmd.test.util.file.DirectoryNode;
 
 import java.io.InputStream;
 
-public class ResourceByteArrayDocumentNode extends AbstractDocumentNode {
-    public ResourceByteArrayDocumentNode(String name, DirectoryNode parent, String resource) {
+public class ResourceDocumentNode extends AbstractDocumentNode {
+    public ResourceDocumentNode(String name, DirectoryNode parent, String resource) {
         super(name, parent);
         this.resource = resource;
     }

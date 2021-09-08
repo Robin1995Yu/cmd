@@ -12,10 +12,15 @@ public class DirectoryNodeImpl extends AbstractFileNode implements DirectoryNode
         super(name, parent);
     }
 
-    private final Map<String, FileNode> children = new HashMap<>();
+    final Map<String, FileNode> children = new HashMap<>();
 
     @Override
     public Collection<FileNode> ls() {
         return children.values();
+    }
+
+    @Override
+    public FileNode getChild(String name) {
+        return children.get(name);
     }
 }

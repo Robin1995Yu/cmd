@@ -8,9 +8,6 @@ public abstract class AbstractFileNode implements FileNode {
     private final DirectoryNode parent;
 
     protected AbstractFileNode(String name, DirectoryNode parent) {
-        if (name == null || name.length() == 0) {
-            throw new IllegalArgumentException("empty file name");
-        }
         this.name = name;
         this.parent = parent;
     }

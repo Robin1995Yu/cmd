@@ -52,6 +52,12 @@
                 <artifactId>cmd-net</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.zhuolu</groupId>
+                <artifactId>cmd-test</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>

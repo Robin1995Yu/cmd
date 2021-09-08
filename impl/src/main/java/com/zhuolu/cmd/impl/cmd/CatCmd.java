@@ -175,7 +175,7 @@ public class CatCmd extends AbstractCmd {
 
         @Override
         protected StringBuilder doHandle(StringBuilder s) {
-            return s.insert(0, String.format("%6d", ++index) + " ");
+            return s.insert(0, String.format("%6d ", ++index));
         }
     }
 

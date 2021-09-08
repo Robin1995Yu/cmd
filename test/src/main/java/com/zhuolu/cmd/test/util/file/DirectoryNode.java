@@ -14,4 +14,6 @@ public interface DirectoryNode extends FileNode {
     }
 
     Collection<FileNode> ls();
+
+    FileNode getChild(String name);
 }
