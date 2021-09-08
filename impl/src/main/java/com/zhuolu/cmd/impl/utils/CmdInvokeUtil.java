@@ -1,5 +1,7 @@
 package com.zhuolu.cmd.impl.utils;
 
+import com.zhuolu.cmd.impl.annotation.CmdInvokeIgnore;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
@@ -28,8 +30,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class CmdInvokeUtil {
-    public static List<Method> getMethod(Class<?> type, String methodName, List<Object> params) {
-        return Arrays.stream(type.getDeclaredMethods()).filter(method -> {
+    public static List<Method> getMethod(Class<?> type, String methodName, List<Object> params, boolean isStatic) {
+        Method[] methods = isStatic ? type.getMethods() : type.getDeclaredMethods();
+        return Arrays.stream(methods).filter(method -> {
+            if (isStatic) {
+                if (!Modifier.isStatic(method.getModifiers())) {
+                    return false;
+                }
+            }
+            if (method.getAnnotation(CmdInvokeIgnore.class) != null) {
+                return false;
+            }
             // 匹配方法名
             if (!method.getName().equals(methodName)) {
                 return false;
